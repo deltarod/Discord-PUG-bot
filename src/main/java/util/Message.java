@@ -13,17 +13,19 @@ public class Message
      * @param message message for channel to reply at
      * @param contents what to send
      */
-    public static void builder(IDiscordClient client, IMessage message, String contents)
+    public static IMessage builder(IDiscordClient client, IMessage message, String contents)
     {
         try
         {
-            new MessageBuilder(client)
+            return new MessageBuilder(client)
                     .withChannel(message.getChannel())
                     .withContent(contents).build();
         }
         catch (Exception e) {
             e.printStackTrace();
         }
+
+        return null;
     }
 
     /**

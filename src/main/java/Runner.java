@@ -1,6 +1,7 @@
 import sx.blah.discord.api.*;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.util.*;
+import util.Config;
 
 /**
  * Runner function for the bot

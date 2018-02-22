@@ -3,7 +3,9 @@ import sx.blah.discord.api.events.*;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.events.guild.GuildCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelEvent;
 import sx.blah.discord.handle.obj.*;
+import util.Config;
 import util.Message;
 
 import java.util.HashMap;
@@ -17,9 +19,9 @@ public class Listener
 
     IDiscordClient client;
 
-    private static String guildCfg = "guildCfg.properties";
+    private static String guildCfg = "";
 
-    private Map<IGuild, String> guildMap;
+    private Map<IGuild, CommandHandler> guildMap;
 
     Config cfg;
 
@@ -31,9 +33,7 @@ public class Listener
     {
         this.client = client;
 
-        guildMap = new HashMap<IGuild, String>();
-
-        cfg = new Config( guildCfg );
+        guildMap = new HashMap<IGuild, CommandHandler>();
     }
 
     /**
@@ -42,17 +42,32 @@ public class Listener
     @EventSubscriber
     public void onMessageReceivedEvent( MessageReceivedEvent event )
     {
-        // TODO: 2/22/2018 command handling
+        String prefix, messageStr;
+
+        IGuild guild = event.getGuild();
+
+        IMessage msg = event.getMessage();
+
+        messageStr = msg.getContent();
+
+        CommandHandler cmd = guildMap.get( guild );
+
+        prefix = cmd.prefix;
+
+        if( messageStr.startsWith( prefix ) )
+        {
+            cmd.run( messageStr.substring( prefix.length() ), msg );
+        }
     }
 
     /**
      * handles startup
      */
     @EventSubscriber
-    public void onReadyEvent(ReadyEvent event) // This method is called when the ReadyEvent is dispatched
+    public void onReadyEvent( ReadyEvent event ) // This method is called when the ReadyEvent is dispatched
     {
 
-        // TODO: 2/22/2018 test .online to see if it is server based or not
+        // TODO: 2/22/2018 Test .online to see if it is server based or not
         //client.online("Type +join to queue in proper channel");
         //foo(); // Will be called!
 
@@ -67,27 +82,47 @@ public class Listener
     {
         String prefix;
 
+        CommandHandler cmd;
+
         IGuild guild = event.getGuild();
 
-        prefix = cfg.getPrefix( guild.getStringID() );
+        cfg = new Config( "GuildConfigs/", guild.getStringID() + ".properties");
 
-        if( prefix == "NEWSERVER" )
+        prefix = cfg.getProp( "prefix" );
+
+        if( prefix == null )
         {
-            guildMap.put( guild, "?" );
+            prefix = "?";
+
+            cfg.setProp( "prefix", prefix );
+
+            cmd = new CommandHandler(prefix, guild, client, cfg );
+
+            guildMap.put( guild, cmd );
 
             newGuild( guild );
         }
         else
         {
-            guildMap.put( guild, prefix );
+            cmd = new CommandHandler(prefix, guild, client, cfg );
+
+            guildMap.put( guild, cmd );
         }
 
-        // TODO: 2/22/2018 GuildBasedCommands
+    }
+
+
+    @EventSubscriber
+    public void userJoinChannel( UserVoiceChannelEvent event )
+    {
+        CommandHandler cmd = guildMap.get(event.getGuild());
+
+        cmd.channelJoin( event );
     }
 
     /**
      * Figures out what to do on join of a new server
-     * @param guild
+     * @param guild new guild to be setup
      */
     private void newGuild( IGuild guild )
     {

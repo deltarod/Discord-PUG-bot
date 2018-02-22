@@ -10,6 +10,7 @@
 
 
     <repositories>
+
         <repository> <!-- This repo fixes issues with transitive dependencies -->
             <id>jcenter</id>
             <url>http://jcenter.bintray.com</url>
@@ -18,13 +19,24 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+
     </repositories>
+
+
     <dependencies>
+
         <dependency>
             <groupId>com.github.austinv11</groupId>
             <artifactId>Discord4J</artifactId>
             <version>2.9.3</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.11</version>
+        </dependency>
+
     </dependencies>
 
 
