@@ -18,18 +18,18 @@ public class Setup implements ICommand
     }
 
     @Override
-    public void run( IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, TenManQueue ten )
+    public void run( IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, TenManQueue ten, int permLevel )
     {
         String[] commandVar;
 
-        boolean nomod = false;
+        boolean mod = true;
 
         if( ten.modRole == null )
         {
-            nomod = true;
+            mod = false;
         }
 
-        if( !nomod && !msg.getAuthor().hasRole(ten.modRole) )
+        if( !mod && ( !msg.getAuthor().hasRole( ten.modRole ) || !msg.getAuthor().equals( owner ) ) )
         {
             msg.reply("Your power is weak");
             return;
@@ -64,6 +64,8 @@ public class Setup implements ICommand
 
                     return;
                 }
+
+                if( permLevel > 2)
 
                 cfg.setProp( "mod", commandVar[ 1 ] );
 
@@ -203,27 +205,43 @@ public class Setup implements ICommand
 
     }
 
+    @Override
+    public int getRank()
+    {
+        return mod;
+    }
+
 
     @Override
-    public String toString() {
-        return "setup: \n" +
+    public String help( int permLevel )
+    {
+        String rtnStr = "setup: \n" +
                 "       Used to set 10 man roles and channels\n" +
-                "   Sub Commands: \n" +
-                "       mod (ID): \n" +
-                "           sets mod role for the bot\n" +
+                "   Sub Commands: \n";
+
+        if( permLevel >= 2 )
+            rtnStr +=
+                    "       mod (ID): \n" +
+                            "           sets mod role for the bot\n";
+
+        rtnStr +=
                 "       10mantext (ID): \n" +
-                "           sets the text channel for ten mans\n" +
-                "       sort (ID): \n" +
-                "           sets voice channel to sort with\n" +
-                "       lobby (ID):\n" +
-                "           sets voice channel to move to after game \n" +
-                "       onechannel (ID): \n" +
-                "           sets voice channel for team 1\n" +
-                "       twochannel (ID): \n" +
-                "           sets voice channel for team 2\n" +
-                "       onerole (ID): \n" +
-                "           sets role for team 1\n" +
-                "       tworole (ID): \n" +
-                "           sets role for team 2";
+                        "           sets the text channel for ten mans\n" +
+                        "       sort (ID): \n" +
+                        "           sets voice channel to sort with\n" +
+                        "       lobby (ID):\n" +
+                        "           sets voice channel to move to after game \n" +
+                        "       onechannel (ID): \n" +
+                        "           sets voice channel for team 1\n" +
+                        "       twochannel (ID): \n" +
+                        "           sets voice channel for team 2\n" +
+                        "       onerole (ID): \n" +
+                        "           sets role for team 1\n" +
+                        "       tworole (ID): \n" +
+                        "           sets role for team 2";
+
+
+        return rtnStr;
     }
+
 }

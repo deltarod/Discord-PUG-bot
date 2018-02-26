@@ -51,16 +51,18 @@ public class Runner
      */
     public static void main( String[] args )
     {
-        String token;
+        String token, owner;
 
         Config cfg = new Config( botConfig );
 
         token = cfg.getToken();
 
+        owner = cfg.getOwner();
+
         IDiscordClient client = createClient( token, true );
 
         EventDispatcher dispatcher = client.getDispatcher();
 
-        dispatcher.registerListener( new Listener( client ) );
+        dispatcher.registerListener( new Listener( client, owner, cfg ) );
     }
 }

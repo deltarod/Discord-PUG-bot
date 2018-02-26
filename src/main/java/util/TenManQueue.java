@@ -1,6 +1,5 @@
 package util;
 
-import com.sun.org.apache.bcel.internal.generic.IUSHR;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
 
@@ -15,23 +14,27 @@ public class TenManQueue
 
     private IDiscordClient client;
 
+    private IUser owner;
+
     private List<IUser> nextQueue, players, teamOne, teamTwo;
 
     public static IRole teamOneRole, teamTwoRole, modRole;
 
-    public static IChannel queueChannel;
+    private static IChannel queueChannel;
 
     public static IVoiceChannel teamOneChannel, teamTwoChannel, sortChannel, lobby;
 
-    boolean isRunning = false;
+    private boolean isRunning = false;
 
-    public TenManQueue(Config cfg, IGuild guild, IDiscordClient client )
+    public TenManQueue( Config cfg, IGuild guild, IDiscordClient client, IUser owner )
     {
         this.guild = guild;
 
         this.cfg = cfg;
 
         this.client = client;
+
+        this.owner = owner;
 
         players = new LinkedList<>();
 
@@ -45,12 +48,15 @@ public class TenManQueue
 
     }
 
+
     public void check()
     {
         try {
 
             String temp, message, prefix = cfg.getProp("prefix");
 
+
+            //probably could simplify this but each one is a little different so i would rather not
 
             //ModRole check
             temp = cfg.getProp("mod");
@@ -186,7 +192,7 @@ public class TenManQueue
             //teamOneRole check
             temp = cfg.getProp("onerole");
 
-            if (temp == null)
+            if ( temp == null )
             {
                 message = "Team one role not set, use " + prefix
                         + "setup onerole (role ID) to fix this";
@@ -240,14 +246,31 @@ public class TenManQueue
         }
     }
 
-    public void join( IDiscordClient client, IMessage msg )
+    public static IRole getModRole()
+    {
+        return modRole;
+    }
+
+    public void join(IDiscordClient client, IMessage msg )
     {
         if( isRunning )
         {
+            if( nextQueue.contains( msg.getAuthor() ))
+            {
+                msg.reply("already in queue");
+                return;
+            }
+
             msg.reply( "There is already a game running, you are in queue for the next game. Your current position is " + (nextQueue.size() + 1) );
 
             nextQueue.add( msg.getAuthor() );
 
+            return;
+        }
+
+        if( players.contains( msg.getAuthor() ))
+        {
+            msg.reply("already in queue");
             return;
         }
 
@@ -260,7 +283,16 @@ public class TenManQueue
 
         if( players.size() > 9 )
         {
-            Message.builder( client, msg, "game starting @everyone");
+            if( queueChannel == null )
+            {
+
+                Message.builder(client, msg, "game starting @everyone");
+            }
+
+            else
+            {
+                    Message.builder(client, queueChannel, "game starting @everyone");
+            }
 
             setupGame();
 
@@ -334,6 +366,16 @@ public class TenManQueue
         players = nextQueue;
 
         nextQueue.clear();
+
+        if( queueChannel == null )
+        {
+            Message.builder(client, guild.getDefaultChannel(), "Current 10 man finished @everyone");
+            return;
+        }
+
+        Message.builder(client, queueChannel, "Current 10 man finished @everyone");
+
+        return;
     }
 
 
@@ -353,6 +395,8 @@ public class TenManQueue
             {
                 msg.reply( current + " was not in queue, there is " + inQueue + " in queue");
 
+                inQueue = nextQueue.size();
+
                 return;
             }
 
@@ -364,6 +408,8 @@ public class TenManQueue
             if(!players.remove( remove ))
             {
                 msg.reply(current + " was not in queue, there is " + inQueue + " in queue");
+
+                inQueue = players.size();
 
                 return;
             }
@@ -405,6 +451,8 @@ public class TenManQueue
 
                 teamTwo.add(current);
             }
+
+            team = !team;
 
         }
     }

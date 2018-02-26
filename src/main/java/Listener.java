@@ -10,6 +10,7 @@ import util.Message;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 /**
  * Listener class for events
@@ -17,23 +18,29 @@ import java.util.Map;
 public class Listener
 {
 
-    IDiscordClient client;
+    private IDiscordClient client;
 
     private static String guildCfg = "";
 
+    private String owner;
+
     private Map<IGuild, CommandHandler> guildMap;
 
-    Config cfg;
+    private Config cfg;
 
     /**
      * Constructor for the listener
      * @param client IDiscordClient for doing things
      */
-    public Listener ( IDiscordClient client )
+    public Listener ( IDiscordClient client, String owner, Config cfg )
     {
+        Scanner scn;
+
         this.client = client;
 
-        guildMap = new HashMap<IGuild, CommandHandler>();
+        this.owner = owner;
+
+        guildMap = new HashMap<>();
     }
 
     /**
@@ -96,7 +103,7 @@ public class Listener
 
             cfg.setProp( "prefix", prefix );
 
-            cmd = new CommandHandler(prefix, guild, client, cfg );
+            cmd = new CommandHandler(prefix, guild, client, cfg, owner );
 
             guildMap.put( guild, cmd );
 
@@ -104,14 +111,17 @@ public class Listener
         }
         else
         {
-            cmd = new CommandHandler(prefix, guild, client, cfg );
+            cmd = new CommandHandler(prefix, guild, client, cfg, owner );
 
             guildMap.put( guild, cmd );
         }
 
     }
 
-
+    /**
+     * Handles users joining a channel, mostly for sorting teams
+     * @param event user join event
+     */
     @EventSubscriber
     public void userJoinChannel( UserVoiceChannelEvent event )
     {
@@ -128,7 +138,7 @@ public class Listener
     {
         IChannel defaultChannel = guild.getDefaultChannel();
 
-        String newMessage = "Hiya! By default the command prefix is ?, you can set that with (insert command here), or find out what i can do with ?help";
+        String newMessage = "Hiya! By default the command prefix is ?, you can set that with ?setup prefix (prefix), or find out what i can do with ?help";
 
         Message.builder( client, defaultChannel, newMessage );
     }

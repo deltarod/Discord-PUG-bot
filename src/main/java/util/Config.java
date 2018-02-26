@@ -89,6 +89,42 @@ public class Config
         return returnValue;
     }
 
+    public String getOwner()
+    {
+        String returnValue, owner = "owner";
+
+        read( cfg, prop );
+
+        returnValue = prop.getProperty( owner );
+
+        if( returnValue == null )
+        {
+            System.out.print("bot owner not set please input bot owner ID: ");
+
+            returnValue = scanner.nextLine();
+
+            input = read( cfg, prop );
+
+            //incase file already created
+            finishRead( input );
+
+            try
+            {
+                output = new FileOutputStream( cfg );
+            }
+            catch ( FileNotFoundException e )
+            {
+                e.printStackTrace();
+            }
+
+            prop.setProperty( owner, returnValue );
+
+            finishWrite( output, prop );
+        }
+
+        return returnValue;
+    }
+
 
     public String getProp( String propertyName )
     {

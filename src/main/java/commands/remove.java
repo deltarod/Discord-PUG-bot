@@ -2,6 +2,7 @@ package commands;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 import util.Config;
 import util.TenManQueue;
 
@@ -15,14 +16,24 @@ public class remove implements ICommand
     }
 
     @Override
-    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, TenManQueue ten) {
+    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, TenManQueue ten, int permLevel )
+    {
         ten.remove( msg, msg.getMentions().remove(0));
     }
 
     @Override
-    public String toString() {
+    public String help(int permLevel)
+    {
         return "remove:\n" +
                 "       removes user from queue\n" +
                 "       (prefix)(remove)(@user)";
     }
+
+    @Override
+    public int getRank()
+    {
+        return mod;
+    }
+
+
 }

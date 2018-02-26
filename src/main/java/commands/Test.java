@@ -17,14 +17,22 @@ public class Test implements ICommand
     }
 
     @Override
-    public void run( IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, TenManQueue ten )
+    public void run( IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, TenManQueue ten, int permLevel )
     {
-        Message.builder(client, msg, "hi");
+
     }
 
     @Override
-    public String toString() {
+    public int getRank()
+    {
+        return owner;
+    }
+
+    @Override
+    public String help( int permLevel )
+    {
         return "test: \n" +
                 "       pls ignore commanderino plsorino";
     }
+
 }
