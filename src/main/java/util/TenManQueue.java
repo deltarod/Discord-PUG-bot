@@ -300,6 +300,13 @@ public class TenManQueue
         }
     }
 
+    public void clear( IMessage msg )
+    {
+        players.clear();
+
+        msg.reply("Queue is cleared");
+    }
+
     public void leave( IDiscordClient client, IMessage msg )
     {
         IUser remove;
@@ -316,6 +323,7 @@ public class TenManQueue
             {
                 msg.reply("you were not in queue, there is " + inQueue + " in queue");
 
+                inQueue = players.size();
             }
 
             msg.reply("you have been removed from the queue, there is now " + inQueue + " in queue");
@@ -331,7 +339,7 @@ public class TenManQueue
             {
                 msg.reply("you were not in queue, there is " + inQueue + " in queue");
 
-
+                inQueue = players.size();
             }
 
             msg.reply("you have been removed from the queue, there is now " + inQueue + " in queue");
@@ -341,6 +349,8 @@ public class TenManQueue
 
     public void finish( IDiscordClient client, IMessage msg )
     {
+        int increment = 0;
+
         players.clear();
 
         isRunning = false;
@@ -363,19 +373,33 @@ public class TenManQueue
 
         teamTwo = new LinkedList<>();
 
-        players = nextQueue;
-
-        nextQueue.clear();
-
         if( queueChannel == null )
         {
             Message.builder(client, guild.getDefaultChannel(), "Current 10 man finished @everyone");
             return;
         }
+        else
+        {
+            Message.builder(client, queueChannel, "Current 10 man finished @everyone");
+        }
 
-        Message.builder(client, queueChannel, "Current 10 man finished @everyone");
 
-        return;
+
+        for( IUser user : nextQueue )
+        {
+            increment++;
+
+            players.add( user );
+
+            nextQueue.remove( user );
+
+
+            if( increment >= 10 )
+            {
+                break;
+            }
+        }
+
     }
 
 
@@ -416,7 +440,7 @@ public class TenManQueue
 
         }
 
-        msg.reply(remove + "has been removed from the queue, there is now " + inQueue + " in queue");
+        msg.reply(remove + " has been removed from the queue, there is now " + inQueue + " in queue");
     }
 
 

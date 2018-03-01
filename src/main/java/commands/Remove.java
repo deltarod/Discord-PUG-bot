@@ -2,13 +2,12 @@ package commands;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
 import util.Config;
 import util.TenManQueue;
 
 import java.util.Map;
 
-public class remove implements ICommand
+public class Remove implements ICommand
 {
     @Override
     public String getName() {
@@ -26,7 +25,7 @@ public class remove implements ICommand
     {
         return "remove:\n" +
                 "       removes user from queue\n" +
-                "       (prefix)(remove)(@user)";
+                "       remove(@user)";
     }
 
     @Override

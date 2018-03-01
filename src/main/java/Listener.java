@@ -78,6 +78,8 @@ public class Listener
         //client.online("Type +join to queue in proper channel");
         //foo(); // Will be called!
 
+        client.online("hi");
+
         System.out.println( "started successfully" );
     }
 
