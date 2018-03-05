@@ -53,7 +53,7 @@ public class Help implements ICommand
 
         stringBuilder.append("```");
 
-        Message.builder( client, msg, stringBuilder.toString() );
+        msg.getAuthor().getOrCreatePMChannel().sendMessage( stringBuilder.toString() );
     }
 
     @Override

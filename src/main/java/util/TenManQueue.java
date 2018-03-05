@@ -14,11 +14,11 @@ public class TenManQueue
 
     private IDiscordClient client;
 
-    private IUser owner;
+    public IUser owner;
 
     private List<IUser> nextQueue, players, teamOne, teamTwo;
 
-    public static IRole teamOneRole, teamTwoRole, modRole;
+    public IRole modRole;
 
     private static IChannel queueChannel;
 
@@ -45,6 +45,8 @@ public class TenManQueue
         nextQueue = new LinkedList<>();
 
         check();
+
+        // TODO: 3/4/2018 allow different sized teams for other games
 
     }
 
@@ -189,49 +191,6 @@ public class TenManQueue
             teamTwoChannel = guild.getVoiceChannelByID(Long.parseLong(temp));
 
 
-            //teamOneRole check
-            temp = cfg.getProp("onerole");
-
-            if ( temp == null )
-            {
-                message = "Team one role not set, use " + prefix
-                        + "setup onerole (role ID) to fix this";
-
-                if( queueChannel == null )
-                {
-                    Message.builder(client, guild.getDefaultChannel(), message);
-                    return;
-                }
-
-                Message.builder(client, queueChannel, message);
-
-                return;
-            }
-
-            teamOneRole = guild.getRoleByID(Long.parseLong(temp));
-
-
-            //teamTwoRole check
-            temp = cfg.getProp("tworole");
-
-            if (temp == null) {
-
-                message = "Team two role not set, use " + prefix
-                        + "setup tworole (role ID) to fix this";
-
-                if( queueChannel == null )
-                {
-                    Message.builder(client, guild.getDefaultChannel(), message);
-                    return;
-                }
-
-                Message.builder(client, queueChannel, message);
-
-                return;
-            }
-
-            teamTwoRole = guild.getRoleByID(Long.parseLong(temp));
-
         }
         catch ( NumberFormatException e )
         {
@@ -246,7 +205,7 @@ public class TenManQueue
         }
     }
 
-    public static IRole getModRole()
+    public IRole getModRole()
     {
         return modRole;
     }
@@ -307,11 +266,11 @@ public class TenManQueue
         msg.reply("Queue is cleared");
     }
 
-    public void leave( IDiscordClient client, IMessage msg )
+    public void leave( IMessage msg )
     {
         IUser remove;
 
-        int inQueue = 0;
+        int inQueue;
 
         if( isRunning )
         {
@@ -355,17 +314,13 @@ public class TenManQueue
 
         isRunning = false;
 
-        for( IUser player : teamOne )
+        for( IUser player : teamOneChannel.getUsersHere() )
         {
-            player.removeRole( teamOneRole );
-
             player.moveToVoiceChannel( lobby );
         }
 
-        for ( IUser player : teamTwo )
+        for ( IUser player : teamTwoChannel.getUsersHere() )
         {
-            player.removeRole( teamTwoRole );
-
             player.moveToVoiceChannel( lobby );
         }
 
@@ -405,7 +360,7 @@ public class TenManQueue
 
     public void remove( IMessage msg, IUser remove )
     {
-        int inQueue = 0;
+        int inQueue;
 
         IUser current;
 
@@ -419,8 +374,6 @@ public class TenManQueue
             {
                 msg.reply( current + " was not in queue, there is " + inQueue + " in queue");
 
-                inQueue = nextQueue.size();
-
                 return;
             }
 
@@ -432,8 +385,6 @@ public class TenManQueue
             if(!players.remove( remove ))
             {
                 msg.reply(current + " was not in queue, there is " + inQueue + " in queue");
-
-                inQueue = players.size();
 
                 return;
             }
@@ -463,17 +414,11 @@ public class TenManQueue
 
             if( team )
             {
-                current.addRole( teamOneRole );
-
-                teamOne.add(current);
-
-
+                teamOne.add( current );
             }
             else
             {
-                current.addRole( teamTwoRole );
-
-                teamTwo.add(current);
+                teamTwo.add( current );
             }
 
             team = !team;
@@ -519,8 +464,20 @@ public class TenManQueue
         }
 
         Message.builder(client, queueChannel, build.toString());
+    }
 
-        return;
+    public boolean inTeam( int team, IUser user )
+    {
+        if( team == 1 )
+        {
+            return teamOne.contains( user );
+        }
 
+        else if( team == 2 )
+        {
+            return teamTwo.contains( user );
+        }
+
+        return false;
     }
 }

@@ -17,7 +17,7 @@ public class Leave implements ICommand
 
     @Override
     public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, TenManQueue ten, int permLevel ) {
-        ten.leave( client, msg );
+        ten.leave( msg );
     }
 
     @Override

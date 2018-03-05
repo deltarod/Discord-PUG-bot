@@ -29,7 +29,7 @@ public class Setup implements ICommand
             mod = false;
         }
 
-        if( !mod && ( !msg.getAuthor().hasRole( ten.modRole ) || !msg.getAuthor().equals( owner ) ) )
+        if( !mod && ( !msg.getAuthor().hasRole( ten.modRole ) || !msg.getAuthor().equals( ten.owner ) ) )
         {
             msg.reply("Your power is weak");
             return;
@@ -45,9 +45,9 @@ public class Setup implements ICommand
             return;
         }
 
-        IChannel channel = null;
+        IChannel channel;
 
-        IRole role = null;
+        IRole role;
 
         try
         {
@@ -153,40 +153,6 @@ public class Setup implements ICommand
                 msg.reply("Team two voice channel set to " +  channel);
             }
 
-            if (subCommand.equals("onerole"))
-            {
-                role = msg.getGuild().getRoleByID( Long.parseLong(commandVar[ 1 ] ) );
-
-                System.out.println(role);
-
-                if( role == null )
-                {
-                    msg.reply("Invalid role");
-
-                    return;
-                }
-
-                cfg.setProp( "onerole", commandVar[ 1 ] );
-
-                msg.reply("Team one role set to " +  role);
-            }
-
-            if (subCommand.equals("tworole"))
-            {
-                role = msg.getGuild().getRoleByID( Long.parseLong(commandVar[ 1 ] ) );
-
-                if( role == null )
-                {
-                    msg.reply("Invalid role");
-
-                    return;
-                }
-
-                cfg.setProp( "tworole", commandVar[ 1 ] );
-
-                msg.reply("Team two role set to " +  role);
-            }
-
             //prefix setting
             if (subCommand.equals("prefix"))
             {
@@ -194,6 +160,8 @@ public class Setup implements ICommand
 
                 msg.reply("prefix set to " +  commandVar[1]);
             }
+
+            // TODO: 3/4/2018 change team size
 
         }
         catch ( NumberFormatException e )
@@ -234,12 +202,7 @@ public class Setup implements ICommand
                         "       onechannel (ID): \n" +
                         "           sets voice channel for team 1\n" +
                         "       twochannel (ID): \n" +
-                        "           sets voice channel for team 2\n" +
-                        "       onerole (ID): \n" +
-                        "           sets role for team 1\n" +
-                        "       tworole (ID): \n" +
-                        "           sets role for team 2";
-
+                        "           sets voice channel for team 2";
 
         return rtnStr;
     }

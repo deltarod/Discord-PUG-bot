@@ -15,7 +15,7 @@ import java.util.Map;
 public class CommandHandler
 {
     //prefix of commands for a given guild
-    public String prefix;
+    String prefix;
 
     //config for guild
     private Config cfg;
@@ -36,7 +36,7 @@ public class CommandHandler
 
 
 
-    public CommandHandler( String commandPrefix, IGuild guild, IDiscordClient client, Config cfg, String owner )
+    CommandHandler( String commandPrefix, IGuild guild, IDiscordClient client, Config cfg, String owner )
     {
         prefix = commandPrefix;
 
@@ -150,14 +150,15 @@ public class CommandHandler
 
         if( event.getVoiceChannel() == TenManQueue.sortChannel )
         {
-            if(user.hasRole( TenManQueue.teamOneRole ))
+            if( ten.inTeam( 1 , user ) )
             {
                 user.moveToVoiceChannel( TenManQueue.teamOneChannel );
             }
-            if(user.hasRole( TenManQueue.teamTwoRole ))
+            else if( ten.inTeam( 2, user ) )
             {
                 user.moveToVoiceChannel( TenManQueue.teamTwoChannel );
             }
+
         }
     }
 }
