@@ -5,7 +5,7 @@ import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 import util.Config;
-import util.TenManQueue;
+import util.QueueHandler;
 
 import java.util.Map;
 
@@ -18,18 +18,20 @@ public class Setup implements ICommand
     }
 
     @Override
-    public void run( IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, TenManQueue ten, int permLevel )
+    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
         String[] commandVar;
 
         boolean mod = true;
 
-        if( ten.modRole == null )
+        int size;
+
+        if( queue.modRole == null )
         {
             mod = false;
         }
 
-        if( !mod && ( !msg.getAuthor().hasRole( ten.modRole ) || !msg.getAuthor().equals( ten.owner ) ) )
+        if( !mod && ( !msg.getAuthor().hasRole( queue.modRole ) || !msg.getAuthor().equals( queue.owner ) ) )
         {
             msg.reply("Your power is weak");
             return;
@@ -49,10 +51,10 @@ public class Setup implements ICommand
 
         IRole role;
 
+        String subCommand = commandVar[0].toLowerCase();
+
         try
         {
-            String subCommand = commandVar[0].toLowerCase();
-
             if (subCommand.equals("mod"))
             {
 
@@ -72,7 +74,7 @@ public class Setup implements ICommand
                 msg.reply("mod role set to " +  role);
             }
 
-            if (subCommand.equals("10mantext"))
+            if (subCommand.equals("queuetext"))
             {
 
                 channel = msg.getGuild().getChannelByID( Long.parseLong(commandVar[ 1 ] ) );
@@ -84,9 +86,9 @@ public class Setup implements ICommand
                     return;
                 }
 
-                cfg.setProp( "10mantext", commandVar[ 1 ] );
+                cfg.setProp( "queuetext", commandVar[ 1 ] );
 
-                msg.reply("10man text channel set to " +  channel);
+                msg.reply("queue text channel set to " +  channel);
             }
 
             if (subCommand.equals("sort"))
@@ -161,15 +163,39 @@ public class Setup implements ICommand
                 msg.reply("prefix set to " +  commandVar[1]);
             }
 
-            // TODO: 3/4/2018 change team size
-
         }
         catch ( NumberFormatException e )
         {
             msg.reply("Invalid ID, must be only numbers");
         }
 
-        ten.check();
+        try
+        {
+            if (subCommand.equals("size"))
+            {
+
+                size = Integer.parseInt( commandVar[ 1 ] );
+
+                if( size <= 0  )
+                {
+                    msg.reply("invalid team size");
+
+                    return;
+                }
+
+                cfg.setProp( "size", commandVar[ 1 ] );
+
+                msg.reply("Team size set to " +  size);
+
+                queue.teamSize = size;
+            }
+        }
+        catch ( NumberFormatException e )
+        {
+            msg.reply("Invalid size, must be whole number");
+        }
+
+        queue.check();
 
     }
 
@@ -202,7 +228,9 @@ public class Setup implements ICommand
                         "       onechannel (ID): \n" +
                         "           sets voice channel for team 1\n" +
                         "       twochannel (ID): \n" +
-                        "           sets voice channel for team 2";
+                        "           sets voice channel for team 2\n" +
+                        "       size (size):" +
+                        "           sets size for each team";
 
         return rtnStr;
     }

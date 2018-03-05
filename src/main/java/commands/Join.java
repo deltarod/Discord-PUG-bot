@@ -2,9 +2,8 @@ package commands;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
 import util.Config;
-import util.TenManQueue;
+import util.QueueHandler;
 
 import java.util.Map;
 
@@ -17,9 +16,9 @@ public class Join implements ICommand
     }
 
     @Override
-    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, TenManQueue ten, int permLevel )
+    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
-        ten.join( client, msg );
+        queue.join( client, msg );
     }
 
     @Override

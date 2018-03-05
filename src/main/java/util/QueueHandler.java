@@ -6,7 +6,7 @@ import sx.blah.discord.handle.obj.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TenManQueue
+public class QueueHandler
 {
     private IGuild guild;
 
@@ -15,6 +15,8 @@ public class TenManQueue
     private IDiscordClient client;
 
     public IUser owner;
+
+    public int teamSize, size;
 
     private List<IUser> nextQueue, players, teamOne, teamTwo;
 
@@ -26,7 +28,7 @@ public class TenManQueue
 
     private boolean isRunning = false;
 
-    public TenManQueue( Config cfg, IGuild guild, IDiscordClient client, IUser owner )
+    public QueueHandler(Config cfg, IGuild guild, IDiscordClient client, IUser owner )
     {
         this.guild = guild;
 
@@ -53,10 +55,9 @@ public class TenManQueue
 
     public void check()
     {
+        String temp, message, prefix = cfg.getProp("prefix");
+
         try {
-
-            String temp, message, prefix = cfg.getProp("prefix");
-
 
             //probably could simplify this but each one is a little different so i would rather not
 
@@ -82,12 +83,12 @@ public class TenManQueue
             modRole = guild.getRoleByID(Long.parseLong(temp));
 
             //queueChannel check
-            temp = cfg.getProp("10mantext");
+            temp = cfg.getProp("queuetext");
 
             if (temp == null) {
 
-                message = "10 man text channel not set, use " + prefix
-                        + "setup 10mantext (text Channel ID) to fix this";
+                message = "queue text channel not set, use " + prefix
+                        + "setup queuetext (text Channel ID) to fix this";
 
                 if( queueChannel == null )
                 {
@@ -203,11 +204,44 @@ public class TenManQueue
 
             e.printStackTrace();
         }
-    }
 
-    public IRole getModRole()
-    {
-        return modRole;
+        try
+        {
+            //size check
+            temp = cfg.getProp("teamsize");
+
+            if (temp == null)
+            {
+
+                message = "Team size not set, use " + prefix
+                        + "setup size (size) to fix this";
+
+                if( queueChannel == null )
+                {
+                    Message.builder(client, guild.getDefaultChannel(), message);
+                    return;
+                }
+
+                Message.builder(client, queueChannel, message);
+
+                return;
+            }
+
+            teamSize = Integer.parseInt( temp );
+
+            size = teamSize * 2;
+        }
+        catch ( NumberFormatException e )
+        {
+            if( queueChannel == null )
+            {
+                Message.builder( client, guild.getDefaultChannel(), "Invalid size");
+                return;
+            }
+            Message.builder( client, queueChannel, "Invalid size");
+
+            e.printStackTrace();
+        }
     }
 
     public void join(IDiscordClient client, IMessage msg )
@@ -235,12 +269,12 @@ public class TenManQueue
 
         players.add( msg.getAuthor() );
 
-        if( players.size() < 10 )
+        if( players.size() < size )
         {
             msg.reply("You have been added to queue, there is currently " + players.size() + " in queue");
         }
 
-        if( players.size() > 9 )
+        if( players.size() >= size )
         {
             if( queueChannel == null )
             {
@@ -330,12 +364,12 @@ public class TenManQueue
 
         if( queueChannel == null )
         {
-            Message.builder(client, guild.getDefaultChannel(), "Current 10 man finished @everyone");
+            Message.builder(client, guild.getDefaultChannel(), "Current game finished");
             return;
         }
         else
         {
-            Message.builder(client, queueChannel, "Current 10 man finished @everyone");
+            Message.builder(client, queueChannel, "Current game finished");
         }
 
 
@@ -349,7 +383,7 @@ public class TenManQueue
             nextQueue.remove( user );
 
 
-            if( increment >= 10 )
+            if( increment >= size )
             {
                 break;
             }
@@ -434,7 +468,7 @@ public class TenManQueue
         {
             build.append( nextQueue.size() );
 
-            build.append("\nUsers currently in queue:\n");
+            build.append("\nUsers currently in queue for next game:\n");
 
             for( IUser user : nextQueue )
             {

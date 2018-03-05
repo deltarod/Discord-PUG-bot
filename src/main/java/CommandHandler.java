@@ -7,7 +7,7 @@ import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import util.Config;
 import org.reflections.Reflections;
-import util.TenManQueue;
+import util.QueueHandler;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +31,8 @@ public class CommandHandler
     //map of commands
     private Map<String, ICommand> cmdMap;
 
-    //ten man queue for server
-    private TenManQueue ten;
+    //queue man queue for server
+    private QueueHandler queue;
 
 
 
@@ -48,7 +48,7 @@ public class CommandHandler
 
         this.owner = guild.getUserByID( Long.parseLong( owner ) );
 
-        ten = new TenManQueue( cfg, guild, client, this.owner );
+        queue = new QueueHandler( cfg, guild, client, this.owner );
 
         cmdMap = new HashMap<>();
 
@@ -100,7 +100,7 @@ public class CommandHandler
             permLevel = ICommand.owner;
         }
         //if user is mod of guild
-        else if( isMod( ten.modRole, guild, author ) )
+        else if( isMod( queue.modRole, guild, author ) )
         {
             permLevel = ICommand.mod;
         }
@@ -114,12 +114,12 @@ public class CommandHandler
 
         try
         {
-            cmd.run( client, commandVar[1], msg, cfg, cmdMap, ten, permLevel );
+            cmd.run( client, commandVar[1], msg, cfg, cmdMap, queue, permLevel );
         }
         //if no args
         catch ( ArrayIndexOutOfBoundsException e )
         {
-            cmd.run( client, null, msg, cfg, cmdMap, ten, permLevel );
+            cmd.run( client, null, msg, cfg, cmdMap, queue, permLevel );
         }
 
         //if prefix gets changed
@@ -148,15 +148,15 @@ public class CommandHandler
     {
         IUser user = event.getUser();
 
-        if( event.getVoiceChannel() == TenManQueue.sortChannel )
+        if( event.getVoiceChannel() == QueueHandler.sortChannel )
         {
-            if( ten.inTeam( 1 , user ) )
+            if( queue.inTeam( 1 , user ) )
             {
-                user.moveToVoiceChannel( TenManQueue.teamOneChannel );
+                user.moveToVoiceChannel( QueueHandler.teamOneChannel );
             }
-            else if( ten.inTeam( 2, user ) )
+            else if( queue.inTeam( 2, user ) )
             {
-                user.moveToVoiceChannel( TenManQueue.teamTwoChannel );
+                user.moveToVoiceChannel( QueueHandler.teamTwoChannel );
             }
 
         }

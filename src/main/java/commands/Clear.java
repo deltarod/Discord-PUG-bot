@@ -3,7 +3,7 @@ package commands;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IMessage;
 import util.Config;
-import util.TenManQueue;
+import util.QueueHandler;
 import java.util.Map;
 
 public class Clear implements ICommand
@@ -15,9 +15,9 @@ public class Clear implements ICommand
     }
 
     @Override
-    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, TenManQueue ten, int permLevel)
+    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel)
     {
-        ten.clear( msg );
+        queue.clear( msg );
     }
 
     @Override

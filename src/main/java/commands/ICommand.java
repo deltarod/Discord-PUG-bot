@@ -2,9 +2,8 @@ package commands;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
 import util.Config;
-import util.TenManQueue;
+import util.QueueHandler;
 
 import java.util.Map;
 
@@ -20,7 +19,7 @@ public interface ICommand
      * gets name of command, used for running the commands
      * @return name of command
      */
-    public String getName();
+    String getName();
 
     /**
      * runs command
@@ -29,21 +28,21 @@ public interface ICommand
      * @param msg       msg containing command
      * @param cfg       cfg of guild
      * @param cmdMap    map of all commands
-     * @param ten       tenmanqueue
+     * @param queue       tenmanqueue
      * @param permLevel permission level of user executing command
      */
-    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, TenManQueue ten, int permLevel );
+    void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel );
 
     /**
      * gets rank requirement of command
      * @return any, mod, owner
      */
-    public int getRank();
+    int getRank();
 
     /**
      * gets the string to print out help commands
-     * @param permLevel
+     * @param permLevel permissions of current user
      */
-    public String help( int permLevel );
+    String help( int permLevel );
 
 }
