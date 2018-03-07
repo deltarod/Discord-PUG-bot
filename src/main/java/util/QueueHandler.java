@@ -258,9 +258,9 @@ public class QueueHandler
 
             str.append( "There is already a game running, you are in queue for the next game. Your current position is ");
 
-            str.append((nextQueue.size() + 1));
-
             nextQueue.add( msg.getAuthor() );
+
+            str.append( nextQueue.size() );
 
             return;
         }
@@ -285,33 +285,15 @@ public class QueueHandler
         if( queueChannel != null )
         {
             Message.builder( client, queueChannel, str.toString() );
-
-            str = new StringBuilder();
-
         }
         else
         {
             msg.reply( str.toString() );
-
-            str = new StringBuilder();
         }
 
         if( players.size() >= size )
         {
-            str.append("game starting @everyone");
-
-            if( queueChannel != null )
-            {
-                Message.builder( client, queueChannel, str.toString() );
-            }
-            else
-            {
-                msg.reply(str.toString());
-            }
-
             setupGame();
-
-            isRunning = true;
         }
     }
 
@@ -380,6 +362,8 @@ public class QueueHandler
             player.moveToVoiceChannel( lobby );
         }
 
+        //clear the teams
+
         teamOne = new LinkedList<>();
 
         teamTwo = new LinkedList<>();
@@ -407,6 +391,8 @@ public class QueueHandler
 
             if( increment >= size )
             {
+                setupGame();
+
                 break;
             }
         }
@@ -462,32 +448,32 @@ public class QueueHandler
 
         IUser current;
 
-        while( players.size() > 0 )
+        for( IUser user : players )
         {
-            size = players.size();
-
-            index = (int)(Math.random()*(size));
-
-            current = players.remove( index );
-
             if( team )
             {
-                teamOne.add( current );
+                teamOne.add( user );
             }
             else
             {
-                teamTwo.add( current );
+                teamTwo.add( user );
             }
 
             team = !team;
-
         }
+
+        //clears linked list
+        players = new LinkedList<>();
+
+        index = 0;
 
         for( IUser user : teamOne )
         {
-            if( teamOne.size() == teamSize )
+            if( index == 0 )
             {
                 str.append( "Captain: ");
+
+                index++;
             }
 
 
@@ -498,11 +484,16 @@ public class QueueHandler
 
         str.append("\n Team Two: \n");
 
+        index = 0;
+
         for( IUser user : teamTwo )
         {
-            if( teamTwo.size() == teamSize )
+
+            if( index == 0 )
             {
                 str.append( "Captain: ");
+
+                index++;
             }
 
 
