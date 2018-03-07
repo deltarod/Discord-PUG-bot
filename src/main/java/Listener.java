@@ -78,7 +78,7 @@ public class Listener
         //client.online("Type +join to queue in proper channel");
         //foo(); // Will be called!
 
-        client.online("hi");
+        client.online("games, now with captains!");
 
         System.out.println( "started successfully" );
     }

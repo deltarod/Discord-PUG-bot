@@ -246,15 +246,19 @@ public class QueueHandler
 
     public void join(IDiscordClient client, IMessage msg )
     {
+        StringBuilder str = new StringBuilder();
+
         if( isRunning )
         {
             if( nextQueue.contains( msg.getAuthor() ))
             {
-                msg.reply("already in queue");
+                str.append("already in queue");
                 return;
             }
 
-            msg.reply( "There is already a game running, you are in queue for the next game. Your current position is " + (nextQueue.size() + 1) );
+            str.append( "There is already a game running, you are in queue for the next game. Your current position is ");
+
+            str.append((nextQueue.size() + 1));
 
             nextQueue.add( msg.getAuthor() );
 
@@ -263,7 +267,7 @@ public class QueueHandler
 
         if( players.contains( msg.getAuthor() ))
         {
-            msg.reply("already in queue");
+            str.append("already in queue");
             return;
         }
 
@@ -271,20 +275,38 @@ public class QueueHandler
 
         if( players.size() < size )
         {
-            msg.reply("You have been added to queue, there is currently " + players.size() + " in queue");
+            str.append("You have been added to queue, there is currently ");
+
+            str.append( players.size() );
+
+            str.append(" in queue");
+        }
+
+        if( queueChannel != null )
+        {
+            Message.builder( client, queueChannel, str.toString() );
+
+            str = new StringBuilder();
+
+        }
+        else
+        {
+            msg.reply( str.toString() );
+
+            str = new StringBuilder();
         }
 
         if( players.size() >= size )
         {
-            if( queueChannel == null )
+            str.append("game starting @everyone");
+
+            if( queueChannel != null )
             {
-
-                Message.builder(client, msg, "game starting @everyone");
+                Message.builder( client, queueChannel, str.toString() );
             }
-
             else
             {
-                    Message.builder(client, queueChannel, "game starting @everyone");
+                msg.reply(str.toString());
             }
 
             setupGame();
@@ -436,6 +458,8 @@ public class QueueHandler
 
         int size, index;
 
+        StringBuilder str = new StringBuilder( "Game starting:\n Team One: \n");
+
         IUser current;
 
         while( players.size() > 0 )
@@ -458,6 +482,46 @@ public class QueueHandler
             team = !team;
 
         }
+
+        for( IUser user : teamOne )
+        {
+            if( teamOne.size() == teamSize )
+            {
+                str.append( "Captain: ");
+            }
+
+
+            str.append( user );
+
+            str.append( "\n ");
+        }
+
+        str.append("\n Team Two: \n");
+
+        for( IUser user : teamTwo )
+        {
+            if( teamTwo.size() == teamSize )
+            {
+                str.append( "Captain: ");
+            }
+
+
+            str.append( user );
+
+            str.append( "\n ");
+        }
+
+        if( queueChannel == null )
+        {
+            Message.builder( client, guild.getDefaultChannel(), str.toString() );
+        }
+
+        else
+        {
+            Message.builder( client, queueChannel, str.toString() );
+        }
+
+
     }
 
     public void listUsersInQueue( IMessage msg )

@@ -183,11 +183,9 @@ public class Setup implements ICommand
                     return;
                 }
 
-                cfg.setProp( "size", commandVar[ 1 ] );
+                cfg.setProp( "teamsize", commandVar[ 1 ] );
 
                 msg.reply("Team size set to " +  size);
-
-                queue.teamSize = size;
             }
         }
         catch ( NumberFormatException e )
