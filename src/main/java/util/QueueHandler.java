@@ -256,6 +256,25 @@ public class QueueHandler
                 return;
             }
 
+            for( IUser user : players )
+            {
+                if( user.equals(msg.getAuthor()) )
+                {
+                    str.append("already in current game");
+
+                    if( queueChannel != null )
+                    {
+                        Message.builder( client, queueChannel, str.toString() );
+                    }
+                    else
+                    {
+                        msg.reply( str.toString() );
+                    }
+
+                    return;
+                }
+            }
+
             str.append( "There is already a game running, you are in queue for the next game. Your current position is ");
 
             nextQueue.add( msg.getAuthor() );
@@ -314,16 +333,18 @@ public class QueueHandler
         {
             remove = msg.getAuthor();
 
-            inQueue = nextQueue.size();
+            inQueue = players.size();
 
             if(!players.remove( remove ))
             {
-                msg.reply("you were not in queue, there is " + inQueue + " in queue");
+                msg.reply("you were not in the next queue, there is " + inQueue + " in queue");
 
-                inQueue = players.size();
+                return;
             }
 
-            msg.reply("you have been removed from the queue, there is now " + inQueue + " in queue");
+            inQueue = nextQueue.size();
+
+            msg.reply("you have been removed from the next queue, there is now " + inQueue + " in queue");
 
         }
         else
@@ -336,8 +357,10 @@ public class QueueHandler
             {
                 msg.reply("you were not in queue, there is " + inQueue + " in queue");
 
-                inQueue = players.size();
+                return;
             }
+
+            inQueue = players.size();
 
             msg.reply("you have been removed from the queue, there is now " + inQueue + " in queue");
 
@@ -346,54 +369,64 @@ public class QueueHandler
 
     public void finish( IDiscordClient client, IMessage msg )
     {
-        int increment = 0;
-
-        players.clear();
-
-        isRunning = false;
-
-        for( IUser player : teamOneChannel.getUsersHere() )
+        if( !isRunning )
         {
-            player.moveToVoiceChannel( lobby );
-        }
-
-        for ( IUser player : teamTwoChannel.getUsersHere() )
-        {
-            player.moveToVoiceChannel( lobby );
-        }
-
-        //clear the teams
-
-        teamOne = new LinkedList<>();
-
-        teamTwo = new LinkedList<>();
-
-        if( queueChannel == null )
-        {
-            Message.builder(client, guild.getDefaultChannel(), "Current game finished");
-            return;
+            if( queueChannel == null )
+            {
+                Message.builder(client, guild.getDefaultChannel(), "no ongoing game");
+            }
+            else
+            {
+                Message.builder(client, queueChannel, "no ongoing game");
+            }
         }
         else
-        {
-            Message.builder(client, queueChannel, "Current game finished");
-        }
-
-
-
-        for( IUser user : nextQueue )
-        {
-            increment++;
-
-            players.add( user );
-
-            nextQueue.remove( user );
-
-
-            if( increment >= size )
             {
-                setupGame();
+            int increment = 0;
 
-                break;
+            players.clear();
+
+            isRunning = false;
+
+            for (IUser player : teamOneChannel.getUsersHere()) {
+                player.moveToVoiceChannel(lobby);
+            }
+
+            for (IUser player : teamTwoChannel.getUsersHere()) {
+                player.moveToVoiceChannel(lobby);
+            }
+
+            //clear the teams
+
+            teamOne = new LinkedList<>();
+
+            teamTwo = new LinkedList<>();
+
+            if (queueChannel == null)
+            {
+                Message.builder(client, guild.getDefaultChannel(), "Current game finished");
+
+            }
+            else
+            {
+                Message.builder(client, queueChannel, "Current game finished");
+            }
+
+
+            for (IUser user : nextQueue)
+            {
+                increment++;
+
+                players.add(user);
+
+                nextQueue.remove(user);
+
+                if (increment >= size)
+                {
+                    setupGame();
+
+                    break;
+                }
             }
         }
 
@@ -442,11 +475,11 @@ public class QueueHandler
     {
         boolean team = false;
 
-        int size, index;
+        int index;
+
+        isRunning = true;
 
         StringBuilder str = new StringBuilder( "Game starting:\n Team One: \n");
-
-        IUser current;
 
         for( IUser user : players )
         {
@@ -462,9 +495,6 @@ public class QueueHandler
             team = !team;
         }
 
-        //clears linked list
-        players = new LinkedList<>();
-
         index = 0;
 
         for( IUser user : teamOne )
@@ -472,14 +502,14 @@ public class QueueHandler
             if( index == 0 )
             {
                 str.append( "Captain: ");
-
-                index++;
             }
 
 
             str.append( user );
 
             str.append( "\n ");
+
+            index++;
         }
 
         str.append("\n Team Two: \n");
@@ -492,14 +522,14 @@ public class QueueHandler
             if( index == 0 )
             {
                 str.append( "Captain: ");
-
-                index++;
             }
 
 
             str.append( user );
 
             str.append( "\n ");
+
+            index++;
         }
 
         if( queueChannel == null )

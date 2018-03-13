@@ -22,20 +22,7 @@ public class Setup implements ICommand
     {
         String[] commandVar;
 
-        boolean mod = true;
-
         int size;
-
-        if( queue.modRole == null )
-        {
-            mod = false;
-        }
-
-        if( !mod && ( !msg.getAuthor().hasRole( queue.modRole ) || !msg.getAuthor().equals( queue.owner ) ) )
-        {
-            msg.reply("Your power is weak");
-            return;
-        }
 
         try
         {
@@ -66,8 +53,6 @@ public class Setup implements ICommand
 
                     return;
                 }
-
-                if( permLevel > 2)
 
                 cfg.setProp( "mod", commandVar[ 1 ] );
 
@@ -139,7 +124,7 @@ public class Setup implements ICommand
                 msg.reply("Team one voice channel set to " +  channel);
             }
 
-            if (subCommand.equals("twochannel"))
+            if (subCommand.equals("twochannel") )
             {
                 channel = msg.getGuild().getVoiceChannelByID( Long.parseLong(commandVar[ 1 ] ) );
 
@@ -156,7 +141,7 @@ public class Setup implements ICommand
             }
 
             //prefix setting
-            if (subCommand.equals("prefix"))
+            if ( subCommand.equals("prefix") )
             {
                 cfg.setProp( "prefix", commandVar[ 1 ] );
 
@@ -171,7 +156,7 @@ public class Setup implements ICommand
 
         try
         {
-            if (subCommand.equals("size"))
+            if ( subCommand.equals("size") )
             {
 
                 size = Integer.parseInt( commandVar[ 1 ] );
@@ -217,8 +202,8 @@ public class Setup implements ICommand
                             "           sets mod role for the bot\n";
 
         rtnStr +=
-                "       10mantext (ID): \n" +
-                        "           sets the text channel for ten mans\n" +
+                        "       queue (ID): \n" +
+                        "           sets the text channel for queue messages\n" +
                         "       sort (ID): \n" +
                         "           sets voice channel to sort with\n" +
                         "       lobby (ID):\n" +

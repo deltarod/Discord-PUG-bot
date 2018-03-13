@@ -94,15 +94,16 @@ public class CommandHandler
             return;
         }
 
-        //if user is owner of bot or guild
-        if( author.equals( owner ) || msg.getGuild().getOwner().equals( author ) )
-        {
-            permLevel = ICommand.owner;
-        }
         //if user is mod of guild
         else if( isMod( queue.modRole, guild, author ) )
         {
             permLevel = ICommand.mod;
+        }
+
+        //if user is owner of bot or guild
+        if( author.equals( owner ) || msg.getGuild().getOwner().equals( author ) )
+        {
+            permLevel = ICommand.owner;
         }
 
         if( permLevel < cmd.getRank() )
@@ -131,7 +132,19 @@ public class CommandHandler
     {
         List<IRole> userRoles = user.getRolesForGuild( guild );
 
-        int modIndex = modRole.getPosition();
+        int modIndex;
+
+        try
+        {
+            modIndex = modRole.getPosition();
+        }
+        catch ( NullPointerException e )
+        {
+            //for first time setup so new user can set mod role
+
+            return true;
+        }
+
 
         for( IRole role : userRoles )
         {

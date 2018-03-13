@@ -20,13 +20,9 @@ public class Listener
 
     private IDiscordClient client;
 
-    private static String guildCfg = "";
-
     private String owner;
 
     private Map<IGuild, CommandHandler> guildMap;
-
-    private Config cfg;
 
     /**
      * Constructor for the listener
@@ -95,7 +91,7 @@ public class Listener
 
         IGuild guild = event.getGuild();
 
-        cfg = new Config( "GuildConfigs/", guild.getStringID() + ".properties");
+        Config cfg = new Config( "GuildConfigs/", guild.getStringID() + ".properties");
 
         prefix = cfg.getProp( "prefix" );
 
@@ -105,7 +101,7 @@ public class Listener
 
             cfg.setProp( "prefix", prefix );
 
-            cmd = new CommandHandler(prefix, guild, client, cfg, owner );
+            cmd = new CommandHandler( prefix, guild, client, cfg, owner );
 
             guildMap.put( guild, cmd );
 
@@ -113,7 +109,7 @@ public class Listener
         }
         else
         {
-            cmd = new CommandHandler(prefix, guild, client, cfg, owner );
+            cmd = new CommandHandler( prefix, guild, client, cfg, owner );
 
             guildMap.put( guild, cmd );
         }
