@@ -7,10 +7,8 @@ import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelEvent
 import sx.blah.discord.handle.obj.*;
 import util.Config;
 import util.Message;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
  * Listener class for events
@@ -30,8 +28,6 @@ public class Listener
      */
     public Listener ( IDiscordClient client, String owner, Config cfg )
     {
-        Scanner scn;
-
         this.client = client;
 
         this.owner = owner;
@@ -69,13 +65,6 @@ public class Listener
     @EventSubscriber
     public void onReadyEvent( ReadyEvent event ) // This method is called when the ReadyEvent is dispatched
     {
-
-        // TODO: 2/22/2018 Test .online to see if it is server based or not
-        //client.online("Type +join to queue in proper channel");
-        //foo(); // Will be called!
-
-        client.online("games, now with captains!");
-
         System.out.println( "started successfully" );
     }
 

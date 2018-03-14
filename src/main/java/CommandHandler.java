@@ -20,7 +20,7 @@ public class CommandHandler
     //config for guild
     private Config cfg;
 
-    private IGuild guild;
+    public IGuild guild;
 
     //owner of bot
     private IUser owner;
@@ -32,8 +32,7 @@ public class CommandHandler
     private Map<String, ICommand> cmdMap;
 
     //queue man queue for server
-    private QueueHandler queue;
-
+    public QueueHandler queue;
 
 
     CommandHandler( String commandPrefix, IGuild guild, IDiscordClient client, Config cfg, String owner )
@@ -68,7 +67,6 @@ public class CommandHandler
                 e.printStackTrace();
             }
         });
-
     }
 
 
@@ -161,15 +159,15 @@ public class CommandHandler
     {
         IUser user = event.getUser();
 
-        if( event.getVoiceChannel() == QueueHandler.sortChannel )
+        if( event.getVoiceChannel() == queue.sortChannel )
         {
             if( queue.inTeam( 1 , user ) )
             {
-                user.moveToVoiceChannel( QueueHandler.teamOneChannel );
+                user.moveToVoiceChannel( queue.teamOneChannel );
             }
             else if( queue.inTeam( 2, user ) )
             {
-                user.moveToVoiceChannel( QueueHandler.teamTwoChannel );
+                user.moveToVoiceChannel( queue.teamTwoChannel );
             }
 
         }

@@ -18,6 +18,8 @@ public class Join implements ICommand
     @Override
     public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
+        System.out.println("command: "+ msg.getGuild().getName());
+
         queue.join( client, msg );
     }
 

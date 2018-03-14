@@ -22,9 +22,9 @@ public class QueueHandler
 
     public IRole modRole;
 
-    private static IChannel queueChannel;
+    public IChannel queueChannel;
 
-    public static IVoiceChannel teamOneChannel, teamTwoChannel, sortChannel, lobby;
+    public IVoiceChannel teamOneChannel, teamTwoChannel, sortChannel, lobby;
 
     private boolean isRunning = false;
 
@@ -46,10 +46,14 @@ public class QueueHandler
 
         nextQueue = new LinkedList<>();
 
+        String temp = cfg.getProp("queuetext");
+
+        if( temp != null )
+        {
+            queueChannel = guild.getChannelByID( Long.parseLong( temp ) );
+        }
+
         check();
-
-        // TODO: 3/4/2018 allow different sized teams for other games
-
     }
 
 
@@ -82,31 +86,27 @@ public class QueueHandler
 
             modRole = guild.getRoleByID(Long.parseLong(temp));
 
-            //queueChannel check
-            temp = cfg.getProp("queuetext");
 
-            if (temp == null) {
+            if ( queueChannel == null )
+            {
 
                 message = "queue text channel not set, use " + prefix
-                        + "setup queuetext (text Channel ID) to fix this";
+                    + "setup queuetext (text Channel ID) to fix this";
 
-                if( queueChannel == null )
-                {
-                    Message.builder(client, guild.getDefaultChannel(), message);
-                    return;
-                }
-
-                Message.builder(client, queueChannel, message);
+                Message.builder(client, guild.getDefaultChannel(), message);
 
                 return;
+
+
             }
-            queueChannel = guild.getChannelByID(Long.parseLong(temp));
+
 
 
             //sort channel check
             temp = cfg.getProp("sort");
 
-            if (temp == null) {
+            if (temp == null)
+            {
 
                 message = "sort voice not set, use " + prefix
                         + "setup sort (voice Channel ID) to fix this";
@@ -128,7 +128,8 @@ public class QueueHandler
             //lobby channel check
             temp = cfg.getProp("lobby");
 
-            if (temp == null) {
+            if (temp == null)
+            {
 
                 message = "lobby voice not set, use " + prefix
                         + "setup lobby (voice Channel ID) to fix this";
@@ -150,7 +151,8 @@ public class QueueHandler
             //teamOneVoice check
             temp = cfg.getProp("onechannel");
 
-            if (temp == null) {
+            if (temp == null)
+            {
 
                 message = "Team one voice channel not set, use " + prefix
                         + "setup onechannel (voice Channel ID) to fix this";
@@ -301,6 +303,7 @@ public class QueueHandler
             str.append(" in queue");
         }
 
+
         if( queueChannel != null )
         {
             Message.builder( client, queueChannel, str.toString() );
@@ -402,7 +405,7 @@ public class QueueHandler
 
             teamTwo = new LinkedList<>();
 
-            if (queueChannel == null)
+            if ( queueChannel == null )
             {
                 Message.builder(client, guild.getDefaultChannel(), "Current game finished");
 
@@ -421,7 +424,7 @@ public class QueueHandler
 
                 nextQueue.remove(user);
 
-                if (increment >= size)
+                if ( increment >= size )
                 {
                     setupGame();
 
