@@ -69,7 +69,7 @@ public class View implements ICommand
 
         str.append("\n");
 
-        str.append("size: ");
+        str.append("team size: ");
 
         str.append(cfg.getProp("teamsize"));
 

@@ -7,7 +7,7 @@ import util.QueueHandler;
 
 import java.util.Map;
 
-public class Join implements ICommand
+public class Queue implements ICommand
 {
     @Override
     public String getName()
@@ -29,7 +29,8 @@ public class Join implements ICommand
     @Override
     public String help(int permLevel)
     {
-        return "join: \n" +
+        return "queue: \n" +
                 "       Joins current queue";
     }
 }
+

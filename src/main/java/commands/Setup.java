@@ -59,7 +59,7 @@ public class Setup implements ICommand
                 msg.reply("mod role set to " +  role);
             }
 
-            if (subCommand.equals("queuetext"))
+            if (subCommand.equals("queue"))
             {
 
                 channel = msg.getGuild().getChannelByID( Long.parseLong(commandVar[ 1 ] ) );
@@ -72,6 +72,8 @@ public class Setup implements ICommand
                 }
 
                 cfg.setProp( "queuetext", commandVar[ 1 ] );
+
+                queue.queueChannel = channel;
 
                 msg.reply("queue text channel set to " +  channel);
             }
@@ -156,7 +158,7 @@ public class Setup implements ICommand
 
         try
         {
-            if ( subCommand.equals("size") )
+            if ( subCommand.equals("teamsize") )
             {
 
                 size = Integer.parseInt( commandVar[ 1 ] );
@@ -169,6 +171,10 @@ public class Setup implements ICommand
                 }
 
                 cfg.setProp( "teamsize", commandVar[ 1 ] );
+
+                queue.teamSize = size;
+
+                queue.size = size*2;
 
                 msg.reply("Team size set to " +  size);
             }
@@ -193,7 +199,7 @@ public class Setup implements ICommand
     public String help( int permLevel )
     {
         String rtnStr = "setup: \n" +
-                "       Used to set 10 man roles and channels\n" +
+                "       Used to set 10 man settings\n" +
                 "   Sub Commands: \n";
 
         if( permLevel >= 2 )
@@ -212,7 +218,7 @@ public class Setup implements ICommand
                         "           sets voice channel for team 1\n" +
                         "       twochannel (ID): \n" +
                         "           sets voice channel for team 2\n" +
-                        "       size (size):" +
+                        "       teamsize (size):" +
                         "           sets size for each team";
 
         return rtnStr;
