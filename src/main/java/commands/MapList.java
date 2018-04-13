@@ -24,6 +24,7 @@ public class MapList implements ICommand
                     break;
                 case "mode":
                     queue.viewMode( msg );
+                    break;
                 default:
                     msg.reply("invalid sub command");
                     break;
