@@ -9,6 +9,7 @@ import util.Config;
 import org.reflections.Reflections;
 import util.QueueHandler;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,7 @@ public class CommandHandler
     //config for guild
     private Config cfg;
 
-    public IGuild guild;
+    private IGuild guild;
 
     //owner of bot
     private IUser owner;
@@ -92,49 +93,60 @@ public class CommandHandler
             return;
         }
 
-        //if user is mod of guild
-        else if( isMod( queue.modRole, guild, author ) )
-        {
-            permLevel = ICommand.mod;
-        }
 
-        //if user is owner of bot or guild
-        if( author.equals( owner ) || msg.getGuild().getOwner().equals( author ) )
+        if( checkPerms( cmd.getRank(), author ) )
         {
-            permLevel = ICommand.owner;
+            try
+            {
+                cmd.run( client, commandVar[1], msg, cfg, cmdMap, queue, permLevel );
+            }
+            //if no args
+            catch ( ArrayIndexOutOfBoundsException e )
+            {
+                cmd.run( client, null, msg, cfg, cmdMap, queue, permLevel );
+            }
         }
-
-        if( permLevel < cmd.getRank() )
+        else
         {
             msg.reply("Your power is weak");
-
-            return;
-        }
-
-        try
-        {
-            cmd.run( client, commandVar[1], msg, cfg, cmdMap, queue, permLevel );
-        }
-        //if no args
-        catch ( ArrayIndexOutOfBoundsException e )
-        {
-            cmd.run( client, null, msg, cfg, cmdMap, queue, permLevel );
         }
 
         //if prefix gets changed
         prefix = cfg.getProp("prefix");
     }
 
+    private boolean checkPerms( int requiredPerm, IUser author )
+    {
+        int perm = ICommand.any;
 
-    private boolean isMod( IRole modRole, IGuild guild, IUser user )
+        if( isAboveRole( queue.modRole, author ) )
+        {
+            perm = ICommand.mod;
+        }
+
+        if( isAboveRole( queue.adminRole, author ) || guild.getOwner().equals( author ) )
+        {
+            perm = ICommand.admin;
+        }
+
+        if( author.equals(owner) )
+        {
+            perm = ICommand.owner;
+        }
+
+        return requiredPerm <= perm;
+    }
+
+
+    private boolean isAboveRole( IRole role, IUser user )
     {
         List<IRole> userRoles = user.getRolesForGuild( guild );
 
-        int modIndex;
+        int roleIndex;
 
         try
         {
-            modIndex = modRole.getPosition();
+            roleIndex = role.getPosition();
         }
         catch ( NullPointerException e )
         {
@@ -144,9 +156,9 @@ public class CommandHandler
         }
 
 
-        for( IRole role : userRoles )
+        for( IRole roleCheck : userRoles )
         {
-            if( modIndex >= role.getPosition() && role.getPosition() != 0 )
+            if( roleCheck.getPosition() >= roleIndex )
             {
                 return true;
             }
@@ -172,4 +184,5 @@ public class CommandHandler
 
         }
     }
+
 }

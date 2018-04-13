@@ -26,12 +26,12 @@ public class Poll implements ICommand
             //Y emoji
             msg.addReaction(ReactionEmoji.of("\uD83C\uDDFE"));
 
-            TimeUnit.MILLISECONDS.sleep(125);
+            TimeUnit.MILLISECONDS.sleep(200);
 
             //N emoji
             msg.addReaction(ReactionEmoji.of("\uD83C\uDDF3"));
 
-            TimeUnit.MILLISECONDS.sleep(125);
+            TimeUnit.MILLISECONDS.sleep(200);
 
             //shrug emote
             msg.addReaction(ReactionEmoji.of("\uD83E\uDD37"));

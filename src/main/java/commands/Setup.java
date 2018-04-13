@@ -59,6 +59,23 @@ public class Setup implements ICommand
                 msg.reply("mod role set to " +  role);
             }
 
+            if (subCommand.equals("admin"))
+            {
+
+                role = msg.getGuild().getRoleByID( Long.parseLong(commandVar[ 1 ] ) );
+
+                if( role == null )
+                {
+                    msg.reply("Invalid role");
+
+                    return;
+                }
+
+                cfg.setProp( "admin", commandVar[ 1 ] );
+
+                msg.reply("admin role set to " +  role);
+            }
+
             if (subCommand.equals("queue"))
             {
 
@@ -191,37 +208,33 @@ public class Setup implements ICommand
     @Override
     public int getRank()
     {
-        return mod;
+        return admin;
     }
 
 
     @Override
     public String help( int permLevel )
     {
-        String rtnStr = "setup: \n" +
+        return  "setup: \n" +
                 "       Used to set 10 man settings\n" +
-                "   Sub Commands: \n";
+                "   Sub Commands: \n" +
+                "       mod (ID): \n" +
+                "           sets mod role for the guild\n" +
+                "       admin (ID): \n" +
+                "           sets admin role for guild\n" +
+                "       queue (ID): \n" +
+                "           sets the text channel for queue messages\n" +
+                "       sort (ID): \n" +
+                "           sets voice channel to sort with\n" +
+                "       lobby (ID):\n" +
+                "           sets voice channel to move to after game \n" +
+                "       onechannel (ID): \n" +
+                "           sets voice channel for team 1\n" +
+                "       twochannel (ID): \n" +
+                "           sets voice channel for team 2\n" +
+                "       teamsize (size):\n" +
+                "           sets size for each team";
 
-        if( permLevel >= 2 )
-            rtnStr +=
-                    "       mod (ID): \n" +
-                            "           sets mod role for the bot\n";
-
-        rtnStr +=
-                        "       queue (ID): \n" +
-                        "           sets the text channel for queue messages\n" +
-                        "       sort (ID): \n" +
-                        "           sets voice channel to sort with\n" +
-                        "       lobby (ID):\n" +
-                        "           sets voice channel to move to after game \n" +
-                        "       onechannel (ID): \n" +
-                        "           sets voice channel for team 1\n" +
-                        "       twochannel (ID): \n" +
-                        "           sets voice channel for team 2\n" +
-                        "       teamsize (size):" +
-                        "           sets size for each team";
-
-        return rtnStr;
     }
 
 }

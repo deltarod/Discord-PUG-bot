@@ -4,6 +4,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.util.MessageBuilder;
+import sx.blah.discord.util.RequestBuffer;
 
 public class Message
 {
@@ -37,9 +38,12 @@ public class Message
     public static void builder(IDiscordClient client, IChannel channelID, String contents) {
         try
         {
-            new MessageBuilder( client )
-                    .withChannel( channelID )
-                    .withContent( contents ).build();
+            RequestBuffer.request(() ->
+            {
+                new MessageBuilder( client )
+                        .withChannel( channelID )
+                        .withContent( contents ).build();
+            });
         }
         catch (Exception e)
         {

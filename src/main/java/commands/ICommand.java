@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public interface ICommand
 {
-    int any = 0, mod = 1, owner = 2;
+    int any = 0, mod = 1, admin = 2, owner = 3;
 
     /**
      * gets name of command, used for running the commands

@@ -23,7 +23,7 @@ public class Clear implements ICommand
     @Override
     public int getRank()
     {
-        return mod;
+        return admin;
     }
 
     @Override

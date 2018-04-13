@@ -75,6 +75,18 @@ public class View implements ICommand
 
         str.append("\n");
 
+        str.append("maps: ");
+
+        str.append(cfg.getProp("maps"));
+
+        str.append("\n");
+
+        str.append("map selection: ");
+
+        str.append(cfg.getProp("mode"));
+
+        str.append("\n");
+
         str.append("```");
 
         msg.reply( str.toString() );

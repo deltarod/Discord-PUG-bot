@@ -14,13 +14,19 @@ public class QueueHandler
 
     private IDiscordClient client;
 
-    public IUser owner;
+    private IUser owner;
+
+    public long startTime;
 
     public int teamSize, size;
 
     private LinkedList<IUser> nextQueue, players, teamOne, teamTwo;
 
-    public IRole modRole;
+    private LinkedList<String> maps, current;
+
+    private boolean selectionMode = true;
+
+    public IRole modRole, adminRole;
 
     public IChannel queueChannel;
 
@@ -46,6 +52,10 @@ public class QueueHandler
 
         nextQueue = new LinkedList<>();
 
+        startTime = System.currentTimeMillis();
+
+        loadMaps();
+
         String temp = cfg.getProp("queuetext");
 
         if( temp != null )
@@ -64,6 +74,28 @@ public class QueueHandler
         try {
 
             //probably could simplify this but each one is a little different so i would rather not
+
+            //AdminRole check
+            temp = cfg.getProp("admin");
+
+            if (temp == null) {
+
+                message = "Admin role not set, use " + prefix
+                        + "setup Admin (role ID) to fix this";
+
+                if( queueChannel == null )
+                {
+                    Message.builder(client, guild.getDefaultChannel(), message);
+                    return;
+                }
+
+                Message.builder(client, queueChannel, message);
+
+                return;
+            }
+
+            adminRole = guild.getRoleByID(Long.parseLong(temp));
+
 
             //ModRole check
             temp = cfg.getProp("mod");
@@ -192,6 +224,24 @@ public class QueueHandler
             }
 
             teamTwoChannel = guild.getVoiceChannelByID(Long.parseLong(temp));
+
+
+            //mode load
+            temp = cfg.getProp("mode");
+
+            if (temp == null)
+            {
+                cfg.setProp("mode", "veto" );
+            }
+            else
+            {
+                if( temp.equals("veto"))
+                {
+                    selectionMode = true;
+                }
+                selectionMode = false;
+
+            }
 
 
         }
@@ -466,12 +516,15 @@ public class QueueHandler
         //shuffles users since they are added in order
         Collections.shuffle(players);
 
+        //shuffles current map pool
+        Collections.shuffle(current);
+
         //should generate an index to get the captains from
         int index = ((int)( Math.random() * teamSize ) % teamSize);
 
         isRunning = true;
 
-        StringBuilder str = new StringBuilder( "Game starting:\n Team One: \n");
+        StringBuilder str = new StringBuilder( "Game starting:\n");
 
         for( IUser user : players )
         {
@@ -487,17 +540,37 @@ public class QueueHandler
             team = !team;
         }
 
-        //team 1 captain
-        str.append("Captain: ");
+        if( selectionMode )
+        {
+            str.append("Team One:\n");
 
-        str.append( teamOne.get( index ) );
+            //team 1 captain
+            str.append("Captain: ");
 
-        str.append("\n Team Two: \n");
+            str.append( teamOne.get( index ) );
 
-        //team 2 captain
-        str.append("Captain: ");
+            str.append("\n Team Two: \n");
 
-        str.append( teamTwo.get( index ) );
+            //team 2 captain
+            str.append("Captain: ");
+
+            str.append( teamTwo.get( index ) );
+        }
+        else
+        {
+
+            str.append("Map: ");
+
+            str.append(current.removeFirst());
+
+            str.append("\n");
+
+            //readds maps if no more are left for next game
+            if( current.size() <= 0 )
+            {
+                resetMaps();
+            }
+        }
 
         str.append( "\nPlayers: \n");
 
@@ -545,6 +618,122 @@ public class QueueHandler
         sendMessage( build );
     }
 
+    private void loadMaps()
+    {
+        maps = new LinkedList<>();
+
+        current = new LinkedList<>();
+
+        String mapStr = cfg.getProp("maps");
+
+        int start = 0;
+
+        if( mapStr == null )
+        {
+            return;
+        }
+
+        for( int i = 0; i < mapStr.length(); i++ )
+        {
+            if( mapStr.charAt(i) == ':' )
+            {
+                    current.add( mapStr.substring( start, i));
+
+                    maps.add( mapStr.substring( start, i));
+
+                    start = i+1;
+            }
+        }
+    }
+
+    public void listMaps( IMessage msg, boolean arg )
+    {
+        LinkedList<String> list;
+
+        StringBuilder str = new StringBuilder("Maps:\n");
+
+        if( arg )
+        {
+            list = current;
+        }
+        else
+        {
+            list = maps;
+        }
+
+        for (String map : list )
+        {
+            str.append(map);
+
+            str.append("\n");
+        }
+
+        msg.reply(str.toString());
+    }
+
+    public void addMap( IMessage msg, String map )
+    {
+        if( maps.contains(map) )
+        {
+            msg.reply("already in pool");
+        }
+        else
+        {
+            maps.add( map );
+
+            current.add( map );
+
+            cfg.setProp("maps", mapsToString(maps));
+
+            msg.reply(map + " added to pool");
+        }
+
+    }
+
+    public void removeMap( IMessage msg, String map )
+    {
+        if( maps.contains(map) )
+        {
+            maps.remove(map);
+
+            cfg.setProp("maps", mapsToString(maps));
+
+            if( current.contains(map) )
+            {
+                current.remove(map);
+            }
+            msg.reply(map + " removed from pool");
+        }
+        else
+        {
+            msg.reply(map + " not in pool");
+        }
+    }
+
+    public void resetMaps()
+    {
+        current = maps;
+    }
+
+    public void toggleMode( IMessage msg )
+    {
+        selectionMode = !selectionMode;
+
+        if( selectionMode )
+        {
+            msg.reply("mode set to veto pick");
+
+            cfg.setProp("mode", "veto");
+        }
+        else
+        {
+            msg.reply("mode set to random map");
+
+            cfg.setProp("mode", "random");
+        }
+    }
+
+    ///////////////////////UTILS///////////////////////
     private void sendMessage( StringBuilder str )
     {
         if( queueChannel == null )
@@ -580,5 +769,19 @@ public class QueueHandler
         }
 
         return false;
+    }
+
+    private String mapsToString( LinkedList<String> list )
+    {
+        StringBuilder str = new StringBuilder();
+
+        for( String map : maps )
+        {
+            str.append(map);
+
+            str.append(":");
+        }
+
+        return str.toString();
     }
 }

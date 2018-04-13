@@ -12,7 +12,7 @@ public class Queue implements ICommand
     @Override
     public String getName()
     {
-        return "join";
+        return "queue";
     }
 
     @Override

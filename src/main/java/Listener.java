@@ -26,7 +26,7 @@ public class Listener
      * Constructor for the listener
      * @param client IDiscordClient for doing things
      */
-    public Listener ( IDiscordClient client, String owner, Config cfg )
+    Listener ( IDiscordClient client, String owner, Config cfg )
     {
         this.client = client;
 
@@ -51,11 +51,9 @@ public class Listener
 
         CommandHandler cmd = guildMap.get( guild );
 
-        prefix = cmd.prefix;
-
-        if( messageStr.startsWith( prefix ) )
+        if( messageStr.startsWith( cmd.prefix ) )
         {
-            cmd.run( messageStr.substring( prefix.length() ), msg );
+            cmd.run( messageStr.substring( cmd.prefix.length() ), msg );
         }
     }
 
@@ -65,6 +63,8 @@ public class Listener
     @EventSubscriber
     public void onReadyEvent( ReadyEvent event ) // This method is called when the ReadyEvent is dispatched
     {
+        client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, " 10 mans, now with random maps!");
+
         System.out.println( "started successfully" );
     }
 
