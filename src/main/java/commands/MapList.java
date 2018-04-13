@@ -7,7 +7,7 @@ import util.QueueHandler;
 
 import java.util.Map;
 
-public class listMaps implements ICommand
+public class MapList implements ICommand
 {
     @Override
     public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel)
@@ -22,6 +22,8 @@ public class listMaps implements ICommand
                 case "pool":
                     queue.listMaps( msg, false );
                     break;
+                case "mode":
+                    queue.viewMode( msg );
                 default:
                     msg.reply("invalid sub command");
                     break;
@@ -56,7 +58,9 @@ public class listMaps implements ICommand
                 "   Sub Commands:\n" +
                 "       current\n" +
                 "           maps currently in the list for current games\n" +
-                "       pool" +
-                "           all the maps in map pool";
+                "       pool\n" +
+                "           all the maps in map pool\n" +
+                "       mode\n" +
+                "           displays current mode";
     }
 }

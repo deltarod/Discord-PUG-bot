@@ -84,8 +84,6 @@ public class CommandHandler
 
         ICommand cmd = cmdMap.get( commandVar[ 0 ] );
 
-        int permLevel = ICommand.any;
-
         if( cmd == null )
         {
             msg.reply( commandVar[ 0 ] + " is an invalid command");
@@ -93,8 +91,9 @@ public class CommandHandler
             return;
         }
 
+        int permLevel = checkPerms( cmd.getRank(), author );
 
-        if( checkPerms( cmd.getRank(), author ) )
+        if( permLevel >= cmd.getRank() )
         {
             try
             {
@@ -115,7 +114,7 @@ public class CommandHandler
         prefix = cfg.getProp("prefix");
     }
 
-    private boolean checkPerms( int requiredPerm, IUser author )
+    private int checkPerms( int requiredPerm, IUser author )
     {
         int perm = ICommand.any;
 
@@ -134,7 +133,7 @@ public class CommandHandler
             perm = ICommand.owner;
         }
 
-        return requiredPerm <= perm;
+        return perm;
     }
 
 

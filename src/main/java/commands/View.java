@@ -39,6 +39,12 @@ public class View implements ICommand
 
         str.append("\n");
 
+        str.append("adminID: ");
+
+        str.append(cfg.getProp("admin"));
+
+        str.append("\n");
+
         str.append("queueID: ");
 
         str.append(cfg.getProp("queuetext"));

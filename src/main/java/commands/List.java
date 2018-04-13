@@ -25,7 +25,7 @@ public class List implements ICommand
     public String help(int permLevel)
     {
         return "list:\n" +
-                "       lists current users in queue(could change to number of people in queue as well)";
+                "       lists current users in queue";
     }
 
     @Override

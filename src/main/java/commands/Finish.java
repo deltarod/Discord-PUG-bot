@@ -31,6 +31,6 @@ public class Finish implements ICommand
 
     @Override
     public int getRank() {
-        return any;
+        return mod;
     }
 }

@@ -81,7 +81,7 @@ public class QueueHandler
             if (temp == null) {
 
                 message = "Admin role not set, use " + prefix
-                        + "setup Admin (role ID) to fix this";
+                        + "setup admin (role ID) to fix this";
 
                 if( queueChannel == null )
                 {
@@ -730,6 +730,18 @@ public class QueueHandler
             msg.reply("mode set to random map");
 
             cfg.setProp("mode", "random");
+        }
+    }
+
+    public void viewMode( IMessage msg )
+    {
+        if( selectionMode )
+        {
+            msg.reply("Mode: Veto");
+        }
+        else
+        {
+            msg.reply("Mode: Random Map");
         }
     }
 
