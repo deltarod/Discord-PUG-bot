@@ -618,6 +618,66 @@ public class QueueHandler
         sendMessage( build );
     }
 
+    public void addToTeam( boolean team, IUser user, IMessage msg )
+    {
+        if( team )
+        {
+            if( !teamOne.contains( user ) || teamTwo.contains( user ))
+            {
+                teamOne.add(user);
+
+                msg.reply(user.mention() + " added to team 1");
+            }
+            else
+            {
+                msg.reply( "user already on team");
+            }
+        }
+        else
+        {
+            if( !teamTwo.contains( user ) || teamOne.contains( user ))
+            {
+                teamTwo.add(user);
+
+                msg.reply(user.mention() + " added to team 2");
+            }
+            else
+            {
+                msg.reply( "user already on team");
+            }
+        }
+    }
+
+    public void removeFromTeam( boolean team, IUser user, IMessage msg )
+    {
+        if( team )
+        {
+            if( teamOne.contains( user ) )
+            {
+                teamOne.remove(user);
+
+                msg.reply(user.mention() + " removed from team 1");
+            }
+            else
+            {
+                msg.reply( "user not on team");
+            }
+        }
+        else
+        {
+            if( teamTwo.contains( user ) )
+            {
+                teamTwo.remove(user);
+
+                msg.reply(user.mention() + " removed from team 2");
+            }
+            else
+            {
+                msg.reply( "user not on team");
+            }
+        }
+    }
+
     private void loadMaps()
     {
         maps = new LinkedList<>();
