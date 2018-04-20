@@ -1,10 +1,14 @@
 package util;
 
+import com.sun.org.apache.bcel.internal.generic.IUSHR;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.RequestBuffer;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class QueueHandler
 {
@@ -61,6 +65,22 @@ public class QueueHandler
         if( temp != null )
         {
             queueChannel = guild.getChannelByID( Long.parseLong( temp ) );
+        }
+
+        temp = cfg.getProp("mode");
+
+        switch ( temp )
+        {
+            case "veto":
+                selectionMode = true;
+                break;
+
+            case "random":
+                selectionMode = false;
+                break;
+            default:
+                selectionMode = true;
+                break;
         }
 
         check();
@@ -123,7 +143,7 @@ public class QueueHandler
             {
 
                 message = "queue text channel not set, use " + prefix
-                    + "setup queuetext (text Channel ID) to fix this";
+                    + "setup queue (text Channel ID) to fix this";
 
                 Message.builder(client, guild.getDefaultChannel(), message);
 
@@ -407,7 +427,7 @@ public class QueueHandler
         }
     }
 
-    public void finish( IDiscordClient client, IMessage msg )
+    public void finish( IDiscordClient client )
     {
         if( !isRunning )
         {
@@ -422,27 +442,35 @@ public class QueueHandler
         }
         else
             {
+                RequestBuffer buffer = new RequestBuffer();
+
             int increment, nextSize;
 
             players.clear();
 
             isRunning = false;
 
-            for (IUser player : teamOneChannel.getUsersHere() )
-            {
-                player.moveToVoiceChannel(lobby);
-            }
-
-            for (IUser player : teamTwoChannel.getUsersHere() )
-            {
-                player.moveToVoiceChannel(lobby);
-            }
-
             //clear the teams
 
             teamOne.clear();
 
             teamTwo.clear();
+
+
+
+                for (IUser player : teamOneChannel.getUsersHere() )
+                {
+                    buffer.request(()->{
+                        player.moveToVoiceChannel(lobby);
+                    });
+                }
+
+                for (IUser player : teamTwoChannel.getUsersHere() )
+                {
+                    buffer.request(()->{
+                        player.moveToVoiceChannel(lobby);
+                    });
+                }
 
             sendMessage( "Current game finished" );
 
@@ -561,7 +589,16 @@ public class QueueHandler
 
             str.append("Map: ");
 
-            str.append(current.removeFirst());
+            try
+            {
+                str.append(current.removeFirst());
+            }
+            catch ( NoSuchElementException e )
+            {
+                sendMessage( "No maps added to maplist" );
+            }
+
+
 
             str.append("\n");
 
@@ -580,6 +617,33 @@ public class QueueHandler
 
             str.append("\n");
         }
+
+        StringBuilder print = new StringBuilder();
+
+        print.append( "Server: ");
+
+        print.append( guild.getName() );
+
+        print.append("\nTeam One: \n");
+
+
+        for(IUser user : teamOne )
+        {
+            print.append( user.getName() );
+
+            print.append("\n");
+        }
+
+        print.append("\nTeam Two: \n");
+
+        for(IUser user : teamTwo )
+        {
+            print.append( user.getName() );
+
+            print.append("\n");
+        }
+
+        System.out.println(print.toString());
 
         sendMessage( str );
     }
@@ -803,6 +867,11 @@ public class QueueHandler
         {
             msg.reply("Mode: Random Map");
         }
+    }
+
+    public boolean modeBool()
+    {
+        return selectionMode;
     }
 
     ///////////////////////UTILS///////////////////////

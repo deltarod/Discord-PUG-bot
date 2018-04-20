@@ -18,7 +18,7 @@ public class Finish implements ICommand
     @Override
     public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
-        queue.finish(client, msg);
+        queue.finish( client );
     }
 
     @Override

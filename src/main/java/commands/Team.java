@@ -15,9 +15,9 @@ public class Team implements ICommand
     {
         String[] commandVar;
 
-        boolean team = false;
+        IUser user;
 
-        IUser user = msg.getMentions().remove(0);
+        boolean team = false;
 
         try
         {
@@ -48,6 +48,16 @@ public class Team implements ICommand
         {
             msg.reply("Please specify a team(1/2)");
 
+            return;
+        }
+
+        try
+        {
+            user = msg.getMentions().remove(0);
+        }
+        catch ( IndexOutOfBoundsException e )
+        {
+            msg.reply("no user to add/remove");
             return;
         }
 

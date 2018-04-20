@@ -93,7 +93,15 @@ public class View implements ICommand
 
         str.append("\n");
 
+        str.append("map selection bool: ");
+
+        str.append( queue.modeBool());
+
+        str.append("\n");
+
         str.append("```");
+
+
 
         msg.reply( str.toString() );
     }
