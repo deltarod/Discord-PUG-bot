@@ -28,7 +28,7 @@ public class QueueHandler
 
     private LinkedList<String> maps, current;
 
-    private boolean selectionMode = true;
+    private boolean selectionMode;
 
     public IRole modRole, adminRole;
 
@@ -244,24 +244,6 @@ public class QueueHandler
             }
 
             teamTwoChannel = guild.getVoiceChannelByID(Long.parseLong(temp));
-
-
-            //mode load
-            temp = cfg.getProp("mode");
-
-            if (temp == null)
-            {
-                cfg.setProp("mode", "veto" );
-            }
-            else
-            {
-                if( temp.equals("veto"))
-                {
-                    selectionMode = true;
-                }
-                selectionMode = false;
-
-            }
 
 
         }

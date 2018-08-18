@@ -60,7 +60,7 @@ public class MapConfig implements ICommand
         }
         catch ( NullPointerException e )
         {
-            msg.reply("your subcommand requires an arguement");
+            msg.reply("your subcommand requires an argument");
 
             e.printStackTrace();
         }
