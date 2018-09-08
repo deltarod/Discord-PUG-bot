@@ -69,18 +69,25 @@ public class QueueHandler
 
         temp = cfg.getProp("mode");
 
-        switch ( temp )
+        if( temp == null )
         {
-            case "veto":
-                selectionMode = true;
-                break;
+            temp = "veto";
 
-            case "random":
-                selectionMode = false;
-                break;
-            default:
-                selectionMode = true;
-                break;
+            cfg.setProp("mode", "veto" );
+        }
+        else {
+            switch (temp) {
+                case "veto":
+                    selectionMode = true;
+                    break;
+
+                case "random":
+                    selectionMode = false;
+                    break;
+                default:
+                    selectionMode = true;
+                    break;
+            }
         }
 
         check();
