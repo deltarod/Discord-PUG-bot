@@ -24,7 +24,7 @@ public class QueueHandler
 
     public int teamSize, size;
 
-    private LinkedList<IUser> nextQueue, players, teamOne, teamTwo;
+    private LinkedList<IUser> nextQueue, players, teamOne, teamTwo, bannedUser;
 
     private LinkedList<String> maps, current;
 
@@ -38,6 +38,13 @@ public class QueueHandler
 
     private boolean isRunning = false;
 
+    /**
+     * Handles the queueing for the 10 man bot
+     * @param cfg       current guild cfg
+     * @param guild     current guild
+     * @param client    bot client
+     * @param owner     owner user
+     */
     public QueueHandler(Config cfg, IGuild guild, IDiscordClient client, IUser owner )
     {
         this.guild = guild;
@@ -55,6 +62,8 @@ public class QueueHandler
         teamTwo = new LinkedList<>();
 
         nextQueue = new LinkedList<>();
+
+        bannedUser = new LinkedList<>();
 
         startTime = System.currentTimeMillis();
 
@@ -252,7 +261,6 @@ public class QueueHandler
 
             teamTwoChannel = guild.getVoiceChannelByID(Long.parseLong(temp));
 
-
         }
         catch ( NumberFormatException e )
         {
@@ -304,6 +312,12 @@ public class QueueHandler
         StringBuilder str = new StringBuilder();
 
         IUser user = msg.getAuthor();
+
+        if( bannedUser.contains(user) )
+        {
+            msg.reply( "You are banned from queueing" );
+            return;
+        }
 
         //if no current game
         if( !isRunning )
@@ -913,5 +927,39 @@ public class QueueHandler
         }
 
         return str.toString();
+    }
+
+    public boolean banUser( IUser user )
+    {
+        if( bannedUser.contains(user) )
+        {
+            return false;
+        }
+        else
+        {
+            bannedUser.add(user);
+
+            players.remove( user );
+
+            nextQueue.remove( user );
+
+            return true;
+        }
+
+
+    }
+
+    public boolean unbanUser ( IUser user )
+    {
+        if( bannedUser.contains(user) )
+        {
+            bannedUser.remove(user);
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }
