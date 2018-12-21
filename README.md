@@ -5,6 +5,10 @@ started as a quick utility to fix someone elses broken junk. All features curren
 
 1.1 Release.
 -
+- Fixed bug where if user is kicked, they are not removed from queue
+
+1.1 Release.
+-
 - Added ability to ban user from queue
 
 1.0 Release.

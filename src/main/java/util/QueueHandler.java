@@ -962,4 +962,11 @@ public class QueueHandler
             return false;
         }
     }
+
+    public void forceRemove ( IUser user )
+    {
+        players.remove( user );
+
+        nextQueue.remove( user );
+    }
 }

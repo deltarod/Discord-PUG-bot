@@ -3,6 +3,7 @@ import sx.blah.discord.api.events.*;
 import sx.blah.discord.handle.impl.events.*;
 import sx.blah.discord.handle.impl.events.guild.GuildCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.member.UserLeaveEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelEvent;
 import sx.blah.discord.handle.obj.*;
 import util.Config;
@@ -116,6 +117,19 @@ public class Listener
 
         cmd.channelJoin( event );
     }
+
+    /**
+     * Removes users from queue if banned/kicked/leaved from server
+     * @param event ban event
+     */
+    @EventSubscriber
+    public void userLeaveEvent ( UserLeaveEvent event )
+    {
+        CommandHandler cmd = guildMap.get(event.getGuild());
+
+        cmd.queue.forceRemove(event.getUser());
+    }
+
 
     /**
      * Figures out what to do on join of a new server

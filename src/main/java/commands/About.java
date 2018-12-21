@@ -26,7 +26,7 @@ public class About implements ICommand
         builder.appendField("Uptime", time, true);
         builder.appendField("Github", "[Queue Bot](https://github.com/deltarod/Discord-PUG-bot)", true);
         builder.appendField("Like the bot? ", "[Buy me a beer!](https://www.paypal.me/deltarod)", true);
-        builder.appendField("Version", "1.1", true);
+        builder.appendField("Version", "1.1.1", true);
 
         msg.getChannel().sendMessage(builder.build());
     }
