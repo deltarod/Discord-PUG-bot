@@ -13,17 +13,25 @@ public class Ban implements ICommand
     @Override
     public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel)
     {
-        for(IUser user : msg.getMentions())
+        if( msg.getMentions().size() != 0 )
         {
-            if(queue.banUser( user ))
+            for(IUser user : msg.getMentions())
             {
-                msg.reply( user.getDisplayName(msg.getGuild()) + "  is now banned from queue");
-            }
-            else
-            {
-                msg.reply(user.getDisplayName(msg.getGuild()) + " is already banned from queue");
+                if(queue.banUser( user ))
+                {
+                    msg.reply( user.getDisplayName(msg.getGuild()) + "  is now banned from queue");
+                }
+                else
+                {
+                    msg.reply(user.getDisplayName(msg.getGuild()) + " is already banned from queue");
+                }
             }
         }
+        else
+        {
+            msg.reply("No users included in message");
+        }
+
     }
 
     @Override

@@ -13,16 +13,24 @@ public class Unban implements ICommand
     @Override
     public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel)
     {
-        for(IUser user : msg.getMentions())
+
+        if( msg.getMentions().size() != 0 )
         {
-            if(queue.unbanUser( user ))
+            for(IUser user : msg.getMentions())
             {
-                msg.reply( user.getDisplayName(msg.getGuild()) + " is now unbanned from queue");
+                if(queue.unbanUser( user ))
+                {
+                    msg.reply( user.getDisplayName(msg.getGuild()) + " is now unbanned from queue");
+                }
+                else
+                {
+                    msg.reply(user.getDisplayName(msg.getGuild()) + " is not banned from queue");
+                }
             }
-            else
-            {
-                msg.reply(user.getDisplayName(msg.getGuild()) + " is not banned from queue");
-            }
+        }
+        else
+        {
+            msg.reply("No users included in message");
         }
     }
 

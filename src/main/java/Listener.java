@@ -66,6 +66,13 @@ public class Listener
     {
         client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, " 10 mans, now with random maps!");
 
+        System.out.println("Guilds: ");
+
+        for( IGuild guild : guildMap.keySet() )
+        {
+            System.out.println( guild.getName() );
+        }
+
         System.out.println( "started successfully" );
     }
 
@@ -103,6 +110,7 @@ public class Listener
 
             guildMap.put( guild, cmd );
         }
+
 
     }
 

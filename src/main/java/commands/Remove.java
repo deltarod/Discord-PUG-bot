@@ -17,7 +17,14 @@ public class Remove implements ICommand
     @Override
     public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
-        queue.remove( msg, msg.getMentions().remove(0));
+        try
+        {
+            queue.remove( msg, msg.getMentions().remove(0));
+        }
+        catch ( IndexOutOfBoundsException e )
+        {
+            msg.reply("invalid remove statement");
+        }
     }
 
     @Override
