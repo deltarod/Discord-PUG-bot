@@ -97,7 +97,6 @@ public class Listener extends ListenerAdapter {
         prefix = cfg.getProp( "prefix" );
 
         //if the guild just joined is new
-        //if the guild just joined is new
         if( prefix == null )
         {
             prefix = "?";

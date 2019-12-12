@@ -90,7 +90,14 @@ public class Setup implements ICommand
         if (subCommand.equals("queue"))
         {
 
-            textTemp = msg.getChannel();
+            try
+            {
+                textTemp = msg.getGuild().getTextChannelById( commandVar[ 1 ]);
+            }
+            catch ( NumberFormatException e )
+            {
+                textTemp = msg.getMentionedChannels().get(0);
+            }
 
             if( textTemp == null )
             {

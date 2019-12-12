@@ -106,6 +106,17 @@ public class QueueHandler
 
         try {
 
+            if( guild.getDefaultChannel() == null )
+            {
+                System.out.println( "Default channel is null" );
+
+                return;
+            }
+            if( !guild.getDefaultChannel().canTalk() )
+            {
+                System.out.println("Cant talk in default channel, setup a queue channel that the bot can talk in");
+            }
+
             //probably could simplify this but each one is a little different so i would rather not
 
             //AdminRole check
