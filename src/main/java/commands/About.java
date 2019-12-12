@@ -1,32 +1,33 @@
 package commands;
 
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.util.EmbedBuilder;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
 import util.Config;
 import util.QueueHandler;
 
+import java.awt.*;
 import java.util.Map;
 
 public class About implements ICommand
 {
     @Override
-    public void run( IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
+    public void run( JDA client, String args, Message msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
         String time = getUptimeString( queue.startTime );
 
         EmbedBuilder builder = new EmbedBuilder();
 
-        builder.withColor(255,0,0);
+        builder.setColor(new Color(255,0,0));
 
-        builder.withAuthorName("Delta's Queue bot");
-        builder.withAuthorIcon("https://i.imgur.com/IkKQcS9.png");
+        builder.setAuthor("Delta's Queue bot");
+        builder.setImage("https://i.imgur.com/IkKQcS9.png");
 
-        builder.appendField("Bot Dev", "deltarod#9654", true);
-        builder.appendField("Uptime", time, true);
-        builder.appendField("Github", "[Queue Bot](https://github.com/deltarod/Discord-PUG-bot)", true);
-        builder.appendField("Like the bot? ", "[Buy me a beer!](https://www.paypal.me/deltarod)", true);
-        builder.appendField("Version", "1.1.1", true);
+        builder.addField("Bot Dev", "deltarod#9654", true);
+        builder.addField("Uptime", time, true);
+        builder.addField("Github", "[Queue Bot](https://github.com/deltarod/Discord-PUG-bot)", true);
+        builder.addField("Like the bot? ", "[Buy me a beer!](https://www.paypal.me/deltarod)", true);
+        builder.addField("Version", "1.1.1", true);
 
         msg.getChannel().sendMessage(builder.build());
     }

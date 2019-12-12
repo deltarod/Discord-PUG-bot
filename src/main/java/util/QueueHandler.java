@@ -1,40 +1,37 @@
 package util;
 
-import com.sun.org.apache.bcel.internal.generic.IUSHR;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.RequestBuffer;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.*;
 
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 public class QueueHandler
 {
-    private IGuild guild;
+    private Guild guild;
 
     private Config cfg;
 
-    private IDiscordClient client;
+    private JDA client;
 
-    private IUser owner;
+    private Member owner;
 
     public long startTime;
 
     public int teamSize, size;
 
-    private LinkedList<IUser> nextQueue, players, teamOne, teamTwo, bannedUser;
+    private LinkedList<Member> nextQueue, players, teamOne, teamTwo, bannedUser;
 
     private LinkedList<String> maps, current;
 
     private boolean selectionMode;
 
-    public IRole modRole, adminRole;
+    public Role modRole, adminRole;
 
-    public IChannel queueChannel;
+    public MessageChannel queueChannel;
 
-    public IVoiceChannel teamOneChannel, teamTwoChannel, sortChannel, lobby;
+    public VoiceChannel teamOneChannel, teamTwoChannel, sortChannel, lobby;
 
     private boolean isRunning = false;
 
@@ -45,7 +42,7 @@ public class QueueHandler
      * @param client    bot client
      * @param owner     owner user
      */
-    public QueueHandler(Config cfg, IGuild guild, IDiscordClient client, IUser owner )
+    public QueueHandler(Config cfg, Guild guild, JDA client, Member owner )
     {
         this.guild = guild;
 
@@ -73,7 +70,7 @@ public class QueueHandler
 
         if( temp != null )
         {
-            queueChannel = guild.getChannelByID( Long.parseLong( temp ) );
+            queueChannel = guild.getTextChannelById( temp );
         }
 
         temp = cfg.getProp("mode");
@@ -109,6 +106,17 @@ public class QueueHandler
 
         try {
 
+            if( guild.getDefaultChannel() == null )
+            {
+                System.out.println( "Default channel is null" );
+
+                return;
+            }
+            if( !guild.getDefaultChannel().canTalk() )
+            {
+                System.out.println("Cant talk in default channel, setup a queue channel that the bot can talk in");
+            }
+
             //probably could simplify this but each one is a little different so i would rather not
 
             //AdminRole check
@@ -117,20 +125,20 @@ public class QueueHandler
             if (temp == null) {
 
                 message = "Admin role not set, use " + prefix
-                        + "setup admin (role ID) to fix this";
+                        + "setup admin (role ID/@Role) to fix this";
 
                 if( queueChannel == null )
                 {
-                    Message.builder(client, guild.getDefaultChannel(), message);
+                    MessageBuild.builder( guild.getDefaultChannel(), message);
                     return;
                 }
 
-                Message.builder(client, queueChannel, message);
+                MessageBuild.builder( queueChannel, message);
 
                 return;
             }
 
-            adminRole = guild.getRoleByID(Long.parseLong(temp));
+            adminRole = guild.getRoleById(Long.parseLong(temp));
 
 
             //ModRole check
@@ -139,33 +147,31 @@ public class QueueHandler
             if (temp == null) {
 
                 message = "mod role not set, use " + prefix
-                        + "setup mod (role ID) to fix this";
+                        + "setup mod (role ID/@Role) to fix this";
 
                 if( queueChannel == null )
                 {
-                    Message.builder(client, guild.getDefaultChannel(), message);
+                    MessageBuild.builder( guild.getDefaultChannel(), message);
                     return;
                 }
 
-                Message.builder(client, queueChannel, message);
+                MessageBuild.builder(  queueChannel, message);
 
                 return;
             }
 
-            modRole = guild.getRoleByID(Long.parseLong(temp));
+            modRole = guild.getRoleById(Long.parseLong(temp));
 
 
             if ( queueChannel == null )
             {
 
                 message = "queue text channel not set, use " + prefix
-                    + "setup queue (text Channel ID) to fix this";
+                    + "setup queue (text Channel ID/#Channel) to fix this";
 
-                Message.builder(client, guild.getDefaultChannel(), message);
+                MessageBuild.builder( guild.getDefaultChannel(), message);
 
                 return;
-
-
             }
 
 
@@ -181,16 +187,16 @@ public class QueueHandler
 
                 if( queueChannel == null )
                 {
-                    Message.builder(client, guild.getDefaultChannel(), message);
+                    MessageBuild.builder( guild.getDefaultChannel(), message);
                     return;
                 }
 
-                Message.builder(client, queueChannel, message);
+                MessageBuild.builder( queueChannel, message);
 
                 return;
             }
 
-            sortChannel = guild.getVoiceChannelByID(Long.parseLong(temp));
+            sortChannel = guild.getVoiceChannelById(Long.parseLong(temp));
 
 
             //lobby channel check
@@ -204,16 +210,16 @@ public class QueueHandler
 
                 if( queueChannel == null )
                 {
-                    Message.builder(client, guild.getDefaultChannel(), message);
+                    MessageBuild.builder( guild.getDefaultChannel(), message);
                     return;
                 }
 
-                Message.builder(client, queueChannel, message);
+                MessageBuild.builder( queueChannel, message);
 
                 return;
             }
 
-            lobby = guild.getVoiceChannelByID(Long.parseLong(temp));
+            lobby = guild.getVoiceChannelById(Long.parseLong(temp));
 
 
             //teamOneVoice check
@@ -227,16 +233,16 @@ public class QueueHandler
 
                 if( queueChannel == null )
                 {
-                    Message.builder(client, guild.getDefaultChannel(), message);
+                    MessageBuild.builder( guild.getDefaultChannel(), message);
                     return;
                 }
 
-                Message.builder(client, queueChannel, message);
+                MessageBuild.builder( queueChannel, message);
 
                 return;
             }
 
-            teamOneChannel = guild.getVoiceChannelByID(Long.parseLong(temp));
+            teamOneChannel = guild.getVoiceChannelById(Long.parseLong(temp));
 
 
             //teamTwoVoice check
@@ -250,26 +256,26 @@ public class QueueHandler
 
                 if( queueChannel == null )
                 {
-                    Message.builder(client, guild.getDefaultChannel(), message);
+                    MessageBuild.builder( guild.getDefaultChannel(), message);
                     return;
                 }
 
-                Message.builder(client, queueChannel, message);
+                MessageBuild.builder( queueChannel, message);
 
                 return;
             }
 
-            teamTwoChannel = guild.getVoiceChannelByID(Long.parseLong(temp));
+            teamTwoChannel = guild.getVoiceChannelById(Long.parseLong(temp));
 
         }
         catch ( NumberFormatException e )
         {
             if( queueChannel == null )
             {
-                Message.builder( client, guild.getDefaultChannel(), "Invalid ID");
+                MessageBuild.builder( guild.getDefaultChannel(), "Invalid ID");
                 return;
             }
-            Message.builder( client, queueChannel, "Invalid ID");
+            MessageBuild.builder( queueChannel, "Invalid ID");
 
             e.printStackTrace();
         }
@@ -298,37 +304,39 @@ public class QueueHandler
         {
             if( queueChannel == null )
             {
-                Message.builder( client, guild.getDefaultChannel(), "Invalid size");
+                MessageBuild.builder( guild.getDefaultChannel(), "Invalid size");
                 return;
             }
-            Message.builder( client, queueChannel, "Invalid size");
+            MessageBuild.builder( queueChannel, "Invalid size");
 
             e.printStackTrace();
         }
     }
 
-    public void join(IDiscordClient client, IMessage msg )
+    public void join( JDA client, Message msg )
     {
         StringBuilder str = new StringBuilder();
 
-        IUser user = msg.getAuthor();
+        Member member = msg.getMember();
 
-        if( bannedUser.contains(user) )
+        MessageChannel channel = msg.getChannel();
+
+        if( bannedUser.contains( member ) )
         {
-            msg.reply( "You are banned from queueing" );
+            MessageBuild.reply( channel, member, "You are banned from queueing" );
             return;
         }
 
         //if no current game
         if( !isRunning )
         {
-            if( players.contains( user ) )
+            if( players.contains( member ) )
             {
                 str.append("Already in queue");
             }
             else
             {
-                players.add( user );
+                players.add( member );
 
                 str.append( "You have been added to queue, there is currently ");
 
@@ -349,7 +357,7 @@ public class QueueHandler
         //if ongoing game
         else
         {
-            if( players.contains( user ) )
+            if( players.contains( member ) )
             {
                 str.append( "Already in current game");
 
@@ -358,13 +366,13 @@ public class QueueHandler
                 return;
             }
 
-            if( nextQueue.contains( user ) )
+            if( nextQueue.contains( member ) )
             {
                 str.append( "Already in queue for next game");
             }
             else
             {
-                nextQueue.add( user );
+                nextQueue.add( member );
 
                 str.append("Already a game running, there is ");
 
@@ -377,18 +385,18 @@ public class QueueHandler
         }
     }
 
-    public void clear( IMessage msg )
+    public void clear( Message msg )
     {
         players.clear();
 
         nextQueue.clear();
 
-        msg.reply("Queue is cleared");
+        MessageBuild.reply( msg, "Queue is cleared" );
     }
 
-    public void leave( IMessage msg )
+    public void leave( Message msg )
     {
-        IUser remove;
+        User remove;
 
         int inQueue;
 
@@ -400,14 +408,14 @@ public class QueueHandler
 
             if(!nextQueue.remove( remove ))
             {
-                msg.reply("you were not in the next queue, there is " + inQueue + " in queue");
+                MessageBuild.reply( msg, "you were not in the next queue, there is " + inQueue + " in queue");
 
                 return;
             }
 
             inQueue = nextQueue.size();
 
-            msg.reply("you have been removed from the next queue, there is now " + inQueue + " in queue");
+            MessageBuild.reply( msg, "you have been removed from the next queue, there is now " + inQueue + " in queue");
 
         }
         else
@@ -418,35 +426,33 @@ public class QueueHandler
 
             if(!players.remove( remove ))
             {
-                msg.reply("you were not in queue, there is " + inQueue + " in queue");
+                MessageBuild.reply( msg,"you were not in queue, there is " + inQueue + " in queue");
 
                 return;
             }
 
             inQueue = players.size();
 
-            msg.reply("you have been removed from the queue, there is now " + inQueue + " in queue");
+            MessageBuild.reply( msg,"you have been removed from the queue, there is now " + inQueue + " in queue");
 
         }
     }
 
-    public void finish( IDiscordClient client )
+    public void finish()
     {
         if( !isRunning )
         {
             if( queueChannel == null )
             {
-                Message.builder(client, guild.getDefaultChannel(), "no ongoing game");
+                MessageBuild.builder( guild.getDefaultChannel(), "no ongoing game");
             }
             else
             {
-                Message.builder(client, queueChannel, "no ongoing game");
+                MessageBuild.builder( queueChannel, "no ongoing game");
             }
         }
         else
             {
-                RequestBuffer buffer = new RequestBuffer();
-
             int increment, nextSize;
 
             players.clear();
@@ -461,18 +467,14 @@ public class QueueHandler
 
 
 
-                for (IUser player : teamOneChannel.getUsersHere() )
+                for ( Member player : teamOneChannel.getMembers() )
                 {
-                    buffer.request(()->{
-                        player.moveToVoiceChannel(lobby);
-                    });
+                    guild.moveVoiceMember( player, teamOneChannel ).queue();
                 }
 
-                for (IUser player : teamTwoChannel.getUsersHere() )
+                for ( Member player : teamTwoChannel.getMembers() )
                 {
-                    buffer.request(()->{
-                        player.moveToVoiceChannel(lobby);
-                    });
+                    guild.moveVoiceMember( player, teamTwoChannel ).queue();
                 }
 
             sendMessage( "Current game finished" );
@@ -481,7 +483,7 @@ public class QueueHandler
 
             for( increment = 0; increment < nextSize; increment++ )
             {
-                IUser current = nextQueue.removeFirst();
+                Member current = nextQueue.removeFirst();
 
                 players.add( current );
 
@@ -497,11 +499,11 @@ public class QueueHandler
     }
 
 
-    public void remove( IMessage msg, IUser remove )
+    public void remove( Message msg, Member remove )
     {
         int inQueue;
 
-        IUser current;
+        Member current;
 
         current = remove;
 
@@ -511,13 +513,13 @@ public class QueueHandler
             {
                 inQueue = nextQueue.size();
 
-                msg.reply( current + " was not in queue, there is " + inQueue + " in queue");
+                MessageBuild.reply( msg, current + " was not in queue, there is " + inQueue + " in queue");
             }
             else
             {
                 inQueue = nextQueue.size();
 
-                msg.reply(remove + " has been removed from the queue, there is now " + inQueue + " in queue");
+                MessageBuild.reply( msg, remove + " has been removed from the queue, there is now " + inQueue + " in queue");
             }
         }
         else
@@ -526,13 +528,13 @@ public class QueueHandler
             {
                 inQueue = players.size();
 
-                msg.reply(current + " was not in queue, there is " + inQueue + " in queue");
+                MessageBuild.reply( msg,current + " was not in queue, there is " + inQueue + " in queue");
             }
             else
             {
                 inQueue = players.size();
 
-                msg.reply(remove + " has been removed from the queue, there is now " + inQueue + " in queue");
+                MessageBuild.reply( msg,remove + " has been removed from the queue, there is now " + inQueue + " in queue");
             }
 
         }
@@ -557,7 +559,7 @@ public class QueueHandler
 
         StringBuilder str = new StringBuilder( "Game starting:\n");
 
-        for( IUser user : players )
+        for( Member user : players )
         {
             if( team )
             {
@@ -614,7 +616,7 @@ public class QueueHandler
 
         str.append( "\nPlayers: \n");
 
-        for( IUser user : players )
+        for( Member user : players )
         {
             str.append( user );
 
@@ -630,18 +632,18 @@ public class QueueHandler
         print.append("\nTeam One: \n");
 
 
-        for(IUser user : teamOne )
+        for( Member user : teamOne )
         {
-            print.append( user.getName() );
+            print.append( user.getNickname() );
 
             print.append("\n");
         }
 
         print.append("\nTeam Two: \n");
 
-        for(IUser user : teamTwo )
+        for( Member user : teamTwo )
         {
-            print.append( user.getName() );
+            print.append( user.getNickname() );
 
             print.append("\n");
         }
@@ -651,7 +653,7 @@ public class QueueHandler
         sendMessage( str );
     }
 
-    public void listUsersInQueue( IMessage msg )
+    public void listUsersInQueue( Message msg )
     {
         StringBuilder build = new StringBuilder("Current users in Queue: ");
 
@@ -661,9 +663,9 @@ public class QueueHandler
 
             build.append("\nUsers currently in queue for next game:\n");
 
-            for( IUser user : nextQueue )
+            for( Member user : nextQueue )
             {
-                build.append( user.getDisplayName( guild ) );
+                build.append( user.getNickname() );
 
                 build.append("\n");
             }
@@ -674,9 +676,9 @@ public class QueueHandler
 
             build.append("\n Users currently in queue:\n");
 
-            for( IUser user : players )
+            for( Member user : players )
             {
-                build.append(user.getDisplayName( guild ));
+                build.append( user.getNickname() );
 
                 build.append("\n");
             }
@@ -685,7 +687,7 @@ public class QueueHandler
         sendMessage( build );
     }
 
-    public void addToTeam( boolean team, IUser user, IMessage msg )
+    public void addToTeam( boolean team, Member user, Message msg )
     {
         if( team )
         {
@@ -693,11 +695,11 @@ public class QueueHandler
             {
                 teamOne.add(user);
 
-                msg.reply(user.mention() + " added to team 1");
+                MessageBuild.reply( msg,user.getUser().getAsMention() + " added to team 1");
             }
             else
             {
-                msg.reply( "user already on team");
+                MessageBuild.reply( msg, "user already on team");
             }
         }
         else
@@ -706,16 +708,16 @@ public class QueueHandler
             {
                 teamTwo.add(user);
 
-                msg.reply(user.mention() + " added to team 2");
+                MessageBuild.reply( msg,user.getUser().getAsMention() + " added to team 2");
             }
             else
             {
-                msg.reply( "user already on team");
+                MessageBuild.reply( msg, "user already on team");
             }
         }
     }
 
-    public void removeFromTeam( boolean team, IUser user, IMessage msg )
+    public void removeFromTeam( boolean team, Member user, Message msg )
     {
         if( team )
         {
@@ -723,11 +725,11 @@ public class QueueHandler
             {
                 teamOne.remove(user);
 
-                msg.reply(user.mention() + " removed from team 1");
+                MessageBuild.reply( msg,user.getUser().getAsMention() + " removed from team 1");
             }
             else
             {
-                msg.reply( "user not on team");
+                MessageBuild.reply( msg, "user not on team");
             }
         }
         else
@@ -736,11 +738,11 @@ public class QueueHandler
             {
                 teamTwo.remove(user);
 
-                msg.reply(user.mention() + " removed from team 2");
+                MessageBuild.reply( msg,user.getUser().getAsMention() + " removed from team 2");
             }
             else
             {
-                msg.reply( "user not on team");
+                MessageBuild.reply( msg, "user not on team");
             }
         }
     }
@@ -773,7 +775,7 @@ public class QueueHandler
         }
     }
 
-    public void listMaps( IMessage msg, boolean arg )
+    public void listMaps( Message msg, boolean arg )
     {
         LinkedList<String> list;
 
@@ -795,14 +797,14 @@ public class QueueHandler
             str.append("\n");
         }
 
-        msg.reply(str.toString());
+        MessageBuild.reply( msg, str.toString() );
     }
 
-    public void addMap( IMessage msg, String map )
+    public void addMap( Message msg, String map )
     {
         if( maps.contains(map) )
         {
-            msg.reply("already in pool");
+            MessageBuild.reply( msg,"already in pool");
         }
         else
         {
@@ -812,12 +814,12 @@ public class QueueHandler
 
             cfg.setProp("maps", mapsToString(maps));
 
-            msg.reply(map + " added to pool");
+            MessageBuild.reply( msg,map + " added to pool");
         }
 
     }
 
-    public void removeMap( IMessage msg, String map )
+    public void removeMap( Message msg, String map )
     {
         if( maps.contains(map) )
         {
@@ -829,11 +831,11 @@ public class QueueHandler
             {
                 current.remove(map);
             }
-            msg.reply(map + " removed from pool");
+            MessageBuild.reply( msg,map + " removed from pool");
         }
         else
         {
-            msg.reply(map + " not in pool");
+            MessageBuild.reply( msg,map + " not in pool");
         }
     }
 
@@ -842,33 +844,33 @@ public class QueueHandler
         current = maps;
     }
 
-    public void toggleMode( IMessage msg )
+    public void toggleMode( Message msg )
     {
         selectionMode = !selectionMode;
 
         if( selectionMode )
         {
-            msg.reply("mode set to veto pick");
+            MessageBuild.reply( msg,"mode set to veto pick");
 
             cfg.setProp("mode", "veto");
         }
         else
         {
-            msg.reply("mode set to random map");
+            MessageBuild.reply( msg,"mode set to random map");
 
             cfg.setProp("mode", "random");
         }
     }
 
-    public void viewMode( IMessage msg )
+    public void viewMode( Message msg )
     {
         if( selectionMode )
         {
-            msg.reply("Mode: Veto");
+            MessageBuild.reply( msg,"Mode: Veto");
         }
         else
         {
-            msg.reply("Mode: Random Map");
+            MessageBuild.reply( msg,"Mode: Random Map");
         }
     }
 
@@ -882,25 +884,25 @@ public class QueueHandler
     {
         if( queueChannel == null )
         {
-            Message.builder(client, guild.getDefaultChannel(), str.toString());
+            MessageBuild.builder( guild.getDefaultChannel(), str.toString());
             return;
         }
 
-        Message.builder(client, queueChannel, str.toString());
+        MessageBuild.builder( queueChannel, str.toString());
     }
 
     private void sendMessage( String str )
     {
         if( queueChannel == null )
         {
-            Message.builder( client, guild.getDefaultChannel(), str );
+            MessageBuild.builder( guild.getDefaultChannel(), str );
             return;
         }
 
-        Message.builder( client, queueChannel, str );
+        MessageBuild.builder( queueChannel, str );
     }
 
-    public boolean inTeam( int team, IUser user )
+    public boolean inTeam( int team, Member user )
     {
         if( team == 1 )
         {
@@ -929,7 +931,7 @@ public class QueueHandler
         return str.toString();
     }
 
-    public boolean banUser( IUser user )
+    public boolean banUser( Member user )
     {
         if( bannedUser.contains(user) )
         {
@@ -949,7 +951,7 @@ public class QueueHandler
 
     }
 
-    public boolean unbanUser ( IUser user )
+    public boolean unbanUser ( Member user )
     {
         if( bannedUser.contains(user) )
         {
@@ -963,7 +965,7 @@ public class QueueHandler
         }
     }
 
-    public void forceRemove ( IUser user )
+    public void forceRemove ( Member user )
     {
         players.remove( user );
 

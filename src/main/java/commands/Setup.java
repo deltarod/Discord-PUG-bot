@@ -1,10 +1,9 @@
 package commands;
 
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.*;
 import util.Config;
+import util.MessageBuild;
 import util.QueueHandler;
 
 import java.util.Map;
@@ -18,7 +17,7 @@ public class Setup implements ICommand
     }
 
     @Override
-    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
+    public void run( JDA client, String args, Message msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
         String[] commandVar;
 
@@ -30,149 +29,161 @@ public class Setup implements ICommand
         }
         catch ( NullPointerException e )
         {
-            msg.reply("you didnt enter a text ID/no arguments");
+            MessageBuild.reply( msg, "you didnt enter a text ID/no arguments");
             return;
         }
 
-        IChannel channel;
+        VoiceChannel voiceTemp;
 
-        IRole role;
+        MessageChannel textTemp;
+
+        Role role;
 
         String subCommand = commandVar[0].toLowerCase();
 
-        try
+        if (subCommand.equals("mod"))
         {
-            if (subCommand.equals("mod"))
+            try
             {
-
-                role = msg.getGuild().getRoleByID( Long.parseLong(commandVar[ 1 ] ) );
-
-                if( role == null )
-                {
-                    msg.reply("Invalid role");
-
-                    return;
-                }
-
-                cfg.setProp( "mod", commandVar[ 1 ] );
-
-                msg.reply("mod role set to " +  role);
+                role = msg.getGuild().getRoleById( Long.parseLong(commandVar[ 1 ] ) );
+            }
+            catch ( NumberFormatException e )
+            {
+                role = msg.getMentionedRoles().get(0);
             }
 
-            if (subCommand.equals("admin"))
+            if( role == null )
             {
+                MessageBuild.reply( msg, "Invalid role");
 
-                role = msg.getGuild().getRoleByID( Long.parseLong(commandVar[ 1 ] ) );
-
-                if( role == null )
-                {
-                    msg.reply("Invalid role");
-
-                    return;
-                }
-
-                cfg.setProp( "admin", commandVar[ 1 ] );
-
-                msg.reply("admin role set to " +  role);
+                return;
             }
 
-            if (subCommand.equals("queue"))
-            {
+            cfg.setProp( "mod", role.getId() );
 
-                channel = msg.getGuild().getChannelByID( Long.parseLong(commandVar[ 1 ] ) );
-
-                if( channel == null )
-                {
-                    msg.reply("Invalid text channel");
-
-                    return;
-                }
-
-                cfg.setProp( "queuetext", commandVar[ 1 ] );
-
-                queue.queueChannel = channel;
-
-                msg.reply("queue text channel set to " +  channel);
-            }
-
-            if (subCommand.equals("sort"))
-            {
-                channel = msg.getGuild().getVoiceChannelByID( Long.parseLong(commandVar[ 1 ] ) );
-
-                if( channel == null )
-                {
-                    msg.reply("Invalid voice channel");
-
-                    return;
-                }
-
-                cfg.setProp( "sort", commandVar[ 1 ] );
-
-                msg.reply("Sort voice channel set to " +  channel);
-            }
-
-            if (subCommand.equals("lobby"))
-            {
-                channel = msg.getGuild().getVoiceChannelByID( Long.parseLong(commandVar[ 1 ] ) );
-
-                if( channel == null )
-                {
-                    msg.reply("Invalid voice channel");
-
-                    return;
-                }
-
-                cfg.setProp( "lobby", commandVar[ 1 ] );
-
-                msg.reply("lobby voice channel set to " +  channel);
-            }
-
-            if (subCommand.equals("onechannel"))
-            {
-                channel = msg.getGuild().getVoiceChannelByID( Long.parseLong(commandVar[ 1 ] ) );
-
-                if( channel == null )
-                {
-                    msg.reply("Invalid voice channel");
-
-                    return;
-                }
-
-                cfg.setProp( "onechannel", commandVar[ 1 ] );
-
-                msg.reply("Team one voice channel set to " +  channel);
-            }
-
-            if (subCommand.equals("twochannel") )
-            {
-                channel = msg.getGuild().getVoiceChannelByID( Long.parseLong(commandVar[ 1 ] ) );
-
-                if( channel == null )
-                {
-                    msg.reply("Invalid voice channel");
-
-                    return;
-                }
-
-                cfg.setProp( "twochannel", commandVar[ 1 ] );
-
-                msg.reply("Team two voice channel set to " +  channel);
-            }
-
-            //prefix setting
-            if ( subCommand.equals("prefix") )
-            {
-                cfg.setProp( "prefix", commandVar[ 1 ] );
-
-                msg.reply("prefix set to " +  commandVar[1]);
-            }
-
-        }
-        catch ( NumberFormatException e )
-        {
-            msg.reply("Invalid ID, must be only numbers");
+            MessageBuild.reply( msg, "mod role set to " +  role);
         }
 
+        if (subCommand.equals("admin"))
+        {
+            try
+            {
+                role = msg.getGuild().getRoleById( Long.parseLong(commandVar[ 1 ] ) );
+            }
+            catch ( NumberFormatException e )
+            {
+                role = msg.getMentionedRoles().get(0);
+            }
+
+            if( role == null )
+            {
+                MessageBuild.reply( msg, "Invalid role");
+
+                return;
+            }
+
+            cfg.setProp( "admin", role.getId() );
+
+            MessageBuild.reply( msg, "admin role set to " +  role);
+        }
+
+        if (subCommand.equals("queue"))
+        {
+
+            try
+            {
+                textTemp = msg.getGuild().getTextChannelById( commandVar[ 1 ]);
+            }
+            catch ( NumberFormatException e )
+            {
+                textTemp = msg.getMentionedChannels().get(0);
+            }
+
+            if( textTemp == null )
+            {
+                MessageBuild.reply( msg, "Invalid text channel");
+
+                return;
+            }
+
+            cfg.setProp( "queuetext", commandVar[ 1 ] );
+
+            queue.queueChannel = textTemp;
+
+            MessageBuild.reply( msg, "queue text channel set to " +  textTemp);
+        }
+
+        if (subCommand.equals("sort"))
+        {
+            voiceTemp = msg.getGuild().getVoiceChannelById( Long.parseLong(commandVar[ 1 ] ) );
+
+            if( voiceTemp == null )
+            {
+                MessageBuild.reply( msg, "Invalid voice channel");
+
+                return;
+            }
+
+            cfg.setProp( "sort", commandVar[ 1 ] );
+
+            MessageBuild.reply( msg, "Sort voice channel set to " +  voiceTemp );
+        }
+
+        if (subCommand.equals("lobby"))
+        {
+            voiceTemp = msg.getGuild().getVoiceChannelById( Long.parseLong(commandVar[ 1 ] ) );
+
+            if( voiceTemp == null )
+            {
+                MessageBuild.reply( msg, "Invalid voice channel");
+
+                return;
+            }
+
+            cfg.setProp( "lobby", commandVar[ 1 ] );
+
+            MessageBuild.reply( msg, "lobby voice channel set to " +  voiceTemp );
+        }
+
+        if (subCommand.equals("onechannel"))
+        {
+            voiceTemp = msg.getGuild().getVoiceChannelById( Long.parseLong(commandVar[ 1 ] ) );
+
+            if( voiceTemp == null )
+            {
+                MessageBuild.reply( msg, "Invalid voice channel");
+
+                return;
+            }
+
+            cfg.setProp( "onechannel", commandVar[ 1 ] );
+
+            MessageBuild.reply( msg, "Team one voice channel set to " +  voiceTemp );
+        }
+
+        if (subCommand.equals("twochannel") )
+        {
+            voiceTemp = msg.getGuild().getVoiceChannelById( Long.parseLong(commandVar[ 1 ] ) );
+
+            if( voiceTemp == null )
+            {
+                MessageBuild.reply( msg, "Invalid voice channel");
+
+                return;
+            }
+
+            cfg.setProp( "twochannel", commandVar[ 1 ] );
+
+            MessageBuild.reply( msg, "Team two voice channel set to " +  voiceTemp );
+        }
+
+        //prefix setting
+        if ( subCommand.equals("prefix") )
+        {
+            cfg.setProp( "prefix", commandVar[ 1 ] );
+
+            MessageBuild.reply( msg, "prefix set to " +  commandVar[1]);
+        }
         try
         {
             if ( subCommand.equals("teamsize") )
@@ -182,7 +193,7 @@ public class Setup implements ICommand
 
                 if( size <= 0  )
                 {
-                    msg.reply("invalid team size");
+                    MessageBuild.reply( msg, "invalid team size");
 
                     return;
                 }
@@ -193,12 +204,12 @@ public class Setup implements ICommand
 
                 queue.size = size*2;
 
-                msg.reply("Team size set to " +  size);
+                MessageBuild.reply( msg, "Team size set to " +  size);
             }
         }
         catch ( NumberFormatException e )
         {
-            msg.reply("Invalid size, must be whole number");
+            MessageBuild.reply( msg, "Invalid size, must be a whole/positive number");
         }
 
         queue.check();

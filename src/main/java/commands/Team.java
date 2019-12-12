@@ -1,9 +1,11 @@
 package commands;
 
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import util.Config;
+import util.MessageBuild;
 import util.QueueHandler;
 
 import java.util.Map;
@@ -11,11 +13,11 @@ import java.util.Map;
 public class Team implements ICommand
 {
     @Override
-    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel)
+    public void run( JDA client, String args, Message msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
         String[] commandVar;
 
-        IUser user;
+        Member user;
 
         boolean team = false;
 
@@ -25,7 +27,7 @@ public class Team implements ICommand
         }
         catch ( NullPointerException e )
         {
-            msg.reply("no arguments");
+            MessageBuild.reply( msg, "no arguments");
             return;
         }
 
@@ -41,23 +43,23 @@ public class Team implements ICommand
             }
             else
             {
-                msg.reply("invalid team");
+                MessageBuild.reply( msg,"invalid team");
             }
         }
         catch (NullPointerException e )
         {
-            msg.reply("Please specify a team(1/2)");
+            MessageBuild.reply( msg,"Please specify a team(1/2)");
 
             return;
         }
 
         try
         {
-            user = msg.getMentions().remove(0);
+            user = msg.getMentionedMembers().remove(0);
         }
         catch ( IndexOutOfBoundsException e )
         {
-            msg.reply("no user to add/remove");
+            MessageBuild.reply( msg,"no user to add/remove");
             return;
         }
 
@@ -71,7 +73,7 @@ public class Team implements ICommand
                 queue.removeFromTeam( team, user, msg );
                 break;
             default:
-                msg.reply("Invalid subcommand");
+                MessageBuild.reply( msg,"Invalid subcommand");
         }
     }
 

@@ -1,8 +1,9 @@
 package commands;
 
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IMessage;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
 import util.Config;
+import util.MessageBuild;
 import util.QueueHandler;
 
 import java.util.Map;
@@ -19,7 +20,7 @@ public class MapConfig implements ICommand
     }
 
     @Override
-    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
+    public void run( JDA client, String args, Message msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
         String[] commandVar;
 
@@ -29,7 +30,7 @@ public class MapConfig implements ICommand
         }
         catch ( NullPointerException e )
         {
-            msg.reply("No args");
+            MessageBuild.reply( msg, "No args");
 
             return;
         }
@@ -47,20 +48,20 @@ public class MapConfig implements ICommand
                 case "reset":
                     queue.resetMaps();
 
-                    msg.reply("maps reset");
+                    MessageBuild.reply( msg, "maps reset");
                     break;
                 case "toggle":
                     queue.toggleMode( msg );
                     break;
                 default:
-                    msg.reply("invalid sub command");
+                    MessageBuild.reply( msg, "invalid sub command");
                     break;
 
             }
         }
         catch ( NullPointerException e )
         {
-            msg.reply("your subcommand requires an argument");
+            MessageBuild.reply( msg, "your subcommand requires an argument");
 
             e.printStackTrace();
         }

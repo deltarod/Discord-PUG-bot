@@ -1,33 +1,36 @@
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.events.*;
-import sx.blah.discord.handle.impl.events.*;
-import sx.blah.discord.handle.impl.events.guild.GuildCreateEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.impl.events.guild.member.UserLeaveEvent;
-import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelEvent;
-import sx.blah.discord.handle.obj.*;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.ReadyEvent;
+import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import util.Config;
-import util.Message;
+import util.MessageBuild;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Listener class for events
  */
-public class Listener
-{
+public class Listener extends ListenerAdapter {
 
-    private IDiscordClient client;
+    private JDA client;
 
     private String owner;
 
-    private Map<IGuild, CommandHandler> guildMap;
+    private Map<Guild, CommandHandler> guildMap;
 
     /**
      * Constructor for the listener
      * @param client IDiscordClient for doing things
      */
-    Listener ( IDiscordClient client, String owner, Config cfg )
+    Listener ( JDA client, String owner, Config cfg )
     {
         this.client = client;
 
@@ -39,16 +42,18 @@ public class Listener
     /**
      * Handles messages
      */
-    @EventSubscriber
-    public void onMessageReceivedEvent( MessageReceivedEvent event )
+    @SubscribeEvent
+    public void onMessageReceived( MessageReceivedEvent event )
     {
+        if( event.getAuthor().isBot() ) return; //replying to other bots = bad
+
         String prefix, messageStr;
 
-        IGuild guild = event.getGuild();
+        Guild guild = event.getGuild();
 
-        IMessage msg = event.getMessage();
+        Message msg = event.getMessage();
 
-        messageStr = msg.getContent();
+        messageStr = msg.getContentDisplay();
 
         CommandHandler cmd = guildMap.get( guild );
 
@@ -58,17 +63,16 @@ public class Listener
         }
     }
 
+
     /**
      * handles startup
      */
-    @EventSubscriber
-    public void onReadyEvent( ReadyEvent event ) // This method is called when the ReadyEvent is dispatched
+    @SubscribeEvent
+    public void onReady( ReadyEvent event ) // This method is called when the ReadyEvent is dispatched
     {
-        client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, " 10 mans, now with random maps!");
-
         System.out.println("Guilds: ");
 
-        for( IGuild guild : guildMap.keySet() )
+        for( Guild guild : guildMap.keySet() )
         {
             System.out.println( guild.getName() );
         }
@@ -79,19 +83,20 @@ public class Listener
     /**
      * also handles some startup
      */
-    @EventSubscriber
-    public void onGuildJoin( GuildCreateEvent event )
+    @SubscribeEvent
+    public void onGuildReady(GuildReadyEvent event )
     {
         String prefix;
 
         CommandHandler cmd;
 
-        IGuild guild = event.getGuild();
+        Guild guild = event.getGuild();
 
-        Config cfg = new Config( "GuildConfigs/", guild.getStringID() + ".properties");
+        Config cfg = new Config( "GuildConfigs/", guild.getId() + ".properties");
 
         prefix = cfg.getProp( "prefix" );
 
+        //if the guild just joined is new
         if( prefix == null )
         {
             prefix = "?";
@@ -118,8 +123,8 @@ public class Listener
      * Handles users joining a channel, mostly for sorting teams
      * @param event user join event
      */
-    @EventSubscriber
-    public void userJoinChannel( UserVoiceChannelEvent event )
+    @SubscribeEvent
+    public void onGuildVoiceJoin( GuildVoiceJoinEvent event )
     {
         CommandHandler cmd = guildMap.get(event.getGuild());
 
@@ -130,12 +135,12 @@ public class Listener
      * Removes users from queue if banned/kicked/leaved from server
      * @param event ban event
      */
-    @EventSubscriber
-    public void userLeaveEvent ( UserLeaveEvent event )
+    @SubscribeEvent
+    public void onGuildVoiceLeave( GuildVoiceLeaveEvent event )
     {
-        CommandHandler cmd = guildMap.get(event.getGuild());
+        CommandHandler cmd = guildMap.get( event.getGuild() );
 
-        cmd.queue.forceRemove(event.getUser());
+        cmd.queue.forceRemove( event.getEntity() );
     }
 
 
@@ -143,13 +148,18 @@ public class Listener
      * Figures out what to do on join of a new server
      * @param guild new guild to be setup
      */
-    private void newGuild( IGuild guild )
+    private void newGuild( Guild guild )
     {
-        IChannel defaultChannel = guild.getDefaultChannel();
+        TextChannel defaultChannel = guild.getDefaultChannel();
+
+        if( defaultChannel == null )
+        {
+            System.out.println("Default Channel not assigned");
+        }
 
         String newMessage = "Hiya! By default the command prefix is ?, you can set that with ?setup prefix (prefix), or find out what i can do with ?help";
 
-        Message.builder( client, defaultChannel, newMessage );
+        MessageBuild.builder( defaultChannel, newMessage );
     }
 
 }
