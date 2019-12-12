@@ -1,15 +1,16 @@
 import commands.ICommand;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelEvent;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
+import net.dv8tion.jda.api.managers.ChannelManager;
+import net.dv8tion.jda.api.managers.GuildManager;
+import net.dv8tion.jda.internal.entities.UserImpl;
+import net.dv8tion.jda.internal.handle.GuildSetupController;
 import util.Config;
 import org.reflections.Reflections;
+import util.MessageBuild;
 import util.QueueHandler;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,13 +22,13 @@ public class CommandHandler
     //config for guild
     private Config cfg;
 
-    private IGuild guild;
+    private Guild guild;
 
     //owner of bot
-    private IUser owner;
+    private Member owner;
 
     //current bot client
-    private IDiscordClient client;
+    private JDA client;
 
     //map of commands
     private Map<String, ICommand> cmdMap;
@@ -36,7 +37,7 @@ public class CommandHandler
     public QueueHandler queue;
 
 
-    CommandHandler( String commandPrefix, IGuild guild, IDiscordClient client, Config cfg, String owner )
+    CommandHandler( String commandPrefix, Guild guild, JDA client, Config cfg, String owner )
     {
         prefix = commandPrefix;
 
@@ -46,7 +47,7 @@ public class CommandHandler
 
         this.cfg = cfg;
 
-        this.owner = guild.getUserByID( Long.parseLong( owner ) );
+        this.owner = guild.getMemberById( Long.parseLong( owner ) );
 
         queue = new QueueHandler( cfg, guild, client, this.owner );
 
@@ -57,16 +58,15 @@ public class CommandHandler
         //loads commands from the util package
         //Lambda statement!
         ref.getSubTypesOf(ICommand.class).forEach(subclass -> {
-            try
-            {
-                ICommand cmd = subclass.newInstance();
 
-                cmdMap.put( cmd.getName(), cmd );
-            }
-            catch (InstantiationException | IllegalAccessException e)
-            {
+            ICommand cmd = null;
+            try {
+                cmd = subclass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
             }
+
+            cmdMap.put( cmd.getName(), cmd );
         });
     }
 
@@ -76,9 +76,11 @@ public class CommandHandler
      * @param command   command to execute
      * @param msg       message of origin
      */
-    public void run( String command, IMessage msg )
+    public void run( String command, Message msg )
     {
-        IUser author = msg.getAuthor();
+        Member author = msg.getMember();
+
+        MessageChannel channel = msg.getChannel();
 
         String[] commandVar = command.split("\\s+", 2);
 
@@ -86,7 +88,7 @@ public class CommandHandler
 
         if( cmd == null )
         {
-            msg.reply( commandVar[ 0 ] + " is an invalid command");
+            MessageBuild.reply( channel, author, commandVar[ 0 ] + " is an invalid command" );
 
             return;
         }
@@ -107,14 +109,14 @@ public class CommandHandler
         }
         else
         {
-            msg.reply("Your power is weak");
+            MessageBuild.reply( channel, author, "Your power is weak");
         }
 
         //if prefix gets changed
         prefix = cfg.getProp("prefix");
     }
 
-    private int checkPerms( int requiredPerm, IUser author )
+    private int checkPerms( int requiredPerm, Member author )
     {
         int perm = ICommand.any;
 
@@ -137,9 +139,9 @@ public class CommandHandler
     }
 
 
-    private boolean isAboveRole( IRole role, IUser user )
+    private boolean isAboveRole( Role role, Member user )
     {
-        List<IRole> userRoles = user.getRolesForGuild( guild );
+        List<Role> userRoles = user.getRoles();
 
         int roleIndex;
 
@@ -155,7 +157,7 @@ public class CommandHandler
         }
 
 
-        for( IRole roleCheck : userRoles )
+        for( Role roleCheck : userRoles )
         {
             if( roleCheck.getPosition() >= roleIndex )
             {
@@ -166,19 +168,21 @@ public class CommandHandler
         return false;
     }
 
-    void channelJoin( UserVoiceChannelEvent event )
+    void channelJoin( GuildVoiceJoinEvent event )
     {
-        IUser user = event.getUser();
+        Member member = event.getMember();
 
-        if( event.getVoiceChannel() == queue.sortChannel )
+        VoiceChannel channel = event.getChannelJoined();
+
+        if( channel == queue.sortChannel )
         {
-            if( queue.inTeam( 1 , user ) )
+            if( queue.inTeam( 1 , member ) )
             {
-                user.moveToVoiceChannel( queue.teamOneChannel );
+                guild.moveVoiceMember( member, queue.teamOneChannel ).queue();
             }
-            else if( queue.inTeam( 2, user ) )
+            else if( queue.inTeam( 2, member ) )
             {
-                user.moveToVoiceChannel( queue.teamTwoChannel );
+                guild.moveVoiceMember( member, queue.teamTwoChannel ).queue();
             }
 
         }

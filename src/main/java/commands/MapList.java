@@ -1,8 +1,9 @@
 package commands;
 
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IMessage;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
 import util.Config;
+import util.MessageBuild;
 import util.QueueHandler;
 
 import java.util.Map;
@@ -10,7 +11,7 @@ import java.util.Map;
 public class MapList implements ICommand
 {
     @Override
-    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel)
+    public void run( JDA client, String args, Message msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
         try
         {
@@ -26,13 +27,13 @@ public class MapList implements ICommand
                     queue.viewMode( msg );
                     break;
                 default:
-                    msg.reply("invalid sub command");
+                    MessageBuild.reply( msg, "invalid sub command");
                     break;
             }
         }
         catch ( NullPointerException e )
         {
-            msg.reply("Sub command required");
+            MessageBuild.reply( msg, "Sub command required");
         }
 
 

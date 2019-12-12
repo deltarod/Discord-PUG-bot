@@ -1,9 +1,10 @@
 package commands;
 
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import util.Config;
+import util.MessageBuild;
 import util.QueueHandler;
 
 import java.util.Map;
@@ -11,26 +12,26 @@ import java.util.Map;
 public class Unban implements ICommand
 {
     @Override
-    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel)
+    public void run( JDA client, String args, Message msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
 
         if( msg.getMentions().size() != 0 )
         {
-            for(IUser user : msg.getMentions())
+            for( Member user : msg.getMentionedMembers() )
             {
                 if(queue.unbanUser( user ))
                 {
-                    msg.reply( user.getDisplayName(msg.getGuild()) + " is now unbanned from queue");
+                    MessageBuild.reply( msg, user.getNickname() + " is now unbanned from queue");
                 }
                 else
                 {
-                    msg.reply(user.getDisplayName(msg.getGuild()) + " is not banned from queue");
+                    MessageBuild.reply( msg, user.getNickname() + " is not banned from queue");
                 }
             }
         }
         else
         {
-            msg.reply("No users included in message");
+            MessageBuild.reply( msg,"No users included in message");
         }
     }
 

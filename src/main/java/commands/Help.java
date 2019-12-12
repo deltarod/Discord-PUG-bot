@@ -1,7 +1,7 @@
 package commands;
 
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IMessage;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
 import util.Config;
 import util.QueueHandler;
 
@@ -17,7 +17,7 @@ public class Help implements ICommand
     }
 
     @Override
-    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel  )
+    public void run( JDA client, String args, Message msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel  )
     {
 
 
@@ -51,7 +51,8 @@ public class Help implements ICommand
 
         stringBuilder.append("```");
 
-        msg.getAuthor().getOrCreatePMChannel().sendMessage( stringBuilder.toString() );
+        msg.getAuthor().openPrivateChannel().complete().sendMessage( stringBuilder ).queue();
+
     }
 
     @Override

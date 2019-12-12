@@ -1,8 +1,9 @@
 package commands;
 
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IMessage;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
 import util.Config;
+import util.MessageBuild;
 import util.QueueHandler;
 
 import java.util.Map;
@@ -15,15 +16,15 @@ public class Remove implements ICommand
     }
 
     @Override
-    public void run(IDiscordClient client, String args, IMessage msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
+    public void run( JDA client, String args, Message msg, Config cfg, Map<String, ICommand> cmdMap, QueueHandler queue, int permLevel )
     {
         try
         {
-            queue.remove( msg, msg.getMentions().remove(0));
+            queue.remove( msg, msg.getMentionedMembers().remove(0));
         }
         catch ( IndexOutOfBoundsException e )
         {
-            msg.reply("invalid remove statement");
+            MessageBuild.reply( msg, "invalid remove statement");
         }
     }
 
