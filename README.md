@@ -1,3 +1,6 @@
+# THIS PROJECT IS NO LONGER MAINTAINED AND DOES NOT WORK
+
+
 # Discord PUG setup
 A Discord bot for setting up pugs, with configurable team sizes, maps, and channels
 
